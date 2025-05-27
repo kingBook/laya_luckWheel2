@@ -1,0 +1,31 @@
+{
+  "resolution": {
+    "designWidth": 640,
+    "designHeight": 1136
+  },
+  "physics2D": {
+    "defaultConfig": {
+      "allowSleeping": false,
+      "gravity": {
+        "x": 0,
+        "y": 9.8
+      },
+      "velocityIterations": 8,
+      "positionIterations": 3,
+      "pixelRatio": 50,
+      "debugDraw": true,
+      "drawShape": true,
+      "drawJoint": true,
+      "drawAABB": false,
+      "drawCenterOfMass": false,
+      "subStep": null
+    }
+  },
+  "modules": {
+    "laya.ui": true,
+    "laya.d3": true
+  },
+  "splash": {
+    "fit": "center"
+  }
+}
