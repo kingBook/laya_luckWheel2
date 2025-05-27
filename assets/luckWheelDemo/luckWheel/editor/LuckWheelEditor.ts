@@ -71,7 +71,8 @@ export class LuckWheelCustomEditor extends IEditorEnv.CustomEditor {
             this._outsidePolygon.touchable = false; // 不可交互
         }
         // 画外分割线
-        this.drawSplitLines(this._outsidePolygon, this._luckWheel.outsideSplitAngles, (this._luckWheel as any).gizmoOutsideRadius);
+        const angles = this._luckWheel.outsideSplitDatas[this._luckWheel.outsideTabIndex].splitAngles;
+        this.drawSplitLines(this._outsidePolygon, angles, (this._luckWheel as any).gizmoOutsideRadius);
     }
 
     /** 绘制内部的多边形 */
@@ -84,7 +85,8 @@ export class LuckWheelCustomEditor extends IEditorEnv.CustomEditor {
             this._innerPolygon.touchable = false; // 不可交互
         }
         // 画内分割线
-        this.drawSplitLines(this._innerPolygon, this._luckWheel.innerSplitAngles, (this._luckWheel as any).gizmoInnerRadius);
+        const angles = this._luckWheel.innerSplitDatas[this._luckWheel.innerTabIndex].splitAngles;
+        this.drawSplitLines(this._innerPolygon, angles, (this._luckWheel as any).gizmoInnerRadius);
     }
 
     /** 绘制区块分割线 */
@@ -117,24 +119,24 @@ export class LuckWheelCustomEditor extends IEditorEnv.CustomEditor {
 
     /** 绘制外多边形的索引编号 */
     private drawOutsideNumberTexts(): void {
-        let radius = (this._luckWheel as any).gizmoOutsideRadius * 0.8; // 数字显示在圆内，半径不取全长
-        let splitPositions: number[] = this._luckWheel.getOutsideSplitPositions(radius, false); // 外转盘各分块的中线点列表
+        const radius = (this._luckWheel as any).gizmoOutsideRadius * 0.8; // 数字显示在圆内，半径不取全长
+        const splitPositions: number[] = this._luckWheel.getOutsideSplitPositions(radius, false); // 外转盘各分块的中线点列表
         this.drawNumberTexts(splitPositions, radius, LuckWheelGizmoConfig.outsideLineColor, this._outsideNumberTexts);
     }
 
     /** 绘制内多边形的索引编号 */
     private drawInnerNumberTexts(): void {
-        let radius = (this._luckWheel as any).gizmoInnerRadius * 0.8; // 数字显示在圆内，半径不取全长
-        let splitPositions: number[] = this._luckWheel.getInnerSplitPositions(radius, false); // 内转盘各分块的中线点列表
+        const radius = (this._luckWheel as any).gizmoInnerRadius * 0.8; // 数字显示在圆内，半径不取全长
+        const splitPositions: number[] = this._luckWheel.getInnerSplitPositions(radius, false); // 内转盘各分块的中线点列表
         this.drawNumberTexts(splitPositions, radius, LuckWheelGizmoConfig.innerLineColor, this._innerNumberTexts);
     }
 
     /** 绘制索引编号 */
     private drawNumberTexts(splitPositions: number[], radius: number, textColor: string, outTexts: IEditorEnv.IGizmoText[]): void {
         for (let i = 0, len = splitPositions.length; i < len; i += 2) {
-            let x = splitPositions[i] + this.owner.pivotX;
-            let y = splitPositions[i + 1] + this.owner.pivotY;
-            let i2 = Math.trunc((i + 1) / 2);
+            const x = splitPositions[i] + this.owner.pivotX;
+            const y = splitPositions[i + 1] + this.owner.pivotY;
+            const i2 = Math.trunc((i + 1) / 2);
 
             let text = outTexts[i2];
             if (!text) {

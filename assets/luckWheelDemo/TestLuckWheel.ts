@@ -19,9 +19,9 @@ export class TestLuckWheel extends Laya.Script {
             console.log("开始旋转");
         } else if (evt.keyCode === Laya.Keyboard.J) { // J
             // 随机取一个外转盘的开奖结果
-            let outsideRewardIndex: number = Math.trunc(Math.random() * this._luckWheel.outsideSplitDatas[this._luckWheel.outsideTabIndex].splitAngles.length);
+            const outsideRewardIndex: number = Math.trunc(Math.random() * this._luckWheel.outsideSplitDatas[this._luckWheel.outsideTabIndex].splitAngles.length);
             // 随机取一个内转盘的开奖结果
-            let innerRewardIndex: number = Math.trunc(Math.random() * this._luckWheel.innerSplitDatas[this._luckWheel.innerTabIndex].splitAngles.length);
+            const innerRewardIndex: number = Math.trunc(Math.random() * this._luckWheel.innerSplitDatas[this._luckWheel.innerTabIndex].splitAngles.length);
             switch (this._luckWheel.mode) {
                 case LuckWheelMode.SingleRotatePointer:
                 case LuckWheelMode.SingleFixedPointer:
