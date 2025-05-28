@@ -16,14 +16,23 @@ export class SplitData {
     private onChangeSplitAngles(key?: string): void {
         if (!key) return;
         const i = parseInt(key);
+        let current = this.splitAngles[i];
+
+        // 限制大于上一个
         if (i > 0) {
-            const prev = this.splitAngles[i - 1];
-            let current = this.splitAngles[i];
-            const next = i < this.splitAngles.length - 1 ? this.splitAngles[i + 1] : 359;
-            // 限制编辑器修改分割线角度时，限制在前后两个之间，且不能大于 359
-            current = Math.max(Math.min(prev + 1, 359), current);
-            current = Math.min(Math.max(next - 1, 0), current);
+            let prev = this.splitAngles[i - 1];
+            prev = Math.min(prev + 1, 359); // 上限 359
+            current = Math.max(prev, current);
         }
+
+        // 限制小于下一个
+        if (i < this.splitAngles.length - 1) {
+            let next = this.splitAngles[i + 1];
+            next = Math.max(next - 1, 0); // 下限 0
+            current = Math.min(next, current);
+        }
+
+        this.splitAngles[i] = current;
     }
     // ===================== Inspector Callback end =============
 }
