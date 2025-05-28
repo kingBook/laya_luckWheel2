@@ -1,7 +1,7 @@
 import { LuckWheelGizmoConfig } from "./LuckWheelGizmoConfig";
 
 /**
- * 自定义 '分割线角度列表' 的 Inspector 字段编辑
+ * 自定义 splitAngles (分割线角度列表) 属性在编辑器属性设置面板中的显示
  */
 @IEditor.inspectorField("LuckWheel.SplitAnglesPropertyField")
 export class SplitAnglesPropertyField extends IEditor.ArrayField {
@@ -35,8 +35,8 @@ export class SplitAnglesPropertyField extends IEditor.ArrayField {
     /** 点击 'Create Child' 按钮时调度 */
     private onClickBtnCreateChild(evt: gui.Event): void {
         const selection: IEditor.IMyNode = Editor.scene.getSelection()[0];
-
         const luckWheel = this.getComponent(selection, "LuckWheel");
+
         if (luckWheel) {
             const watchProp = this.target.owner.parent.parent.watchProps[0];
 
@@ -53,10 +53,11 @@ export class SplitAnglesPropertyField extends IEditor.ArrayField {
 
     /** 点击 'Copy Values' 按钮时调度 */
     private onClickBtnCopyValues(evt: gui.Event): void {
+        // 将数值拷贝一以剪切板
         this.writeAnglesToClipboard(this.target.datas[0]);
     }
 
-    /** 将一个角度值列表写入到剪切版 */
+    /** 将一个角度值列表写入到剪切板 */
     private writeAnglesToClipboard(angles: number[]): void {
         let text: string = "";
         for (let i = 0, len = angles.length; i < len; i++) {
@@ -66,31 +67,31 @@ export class SplitAnglesPropertyField extends IEditor.ArrayField {
     }
 
     /** 创建外转盘角度分割区域的 child */
-    private async createOutsideChild(selection: IEditor.IMyNode, luckWheel: IEditor.IMyComponent): Promise<IEditor.IMyNode> {
+    private async createOutsideChild(parent: IEditor.IMyNode, luckWheel: IEditor.IMyComponent): Promise<IEditor.IMyNode> {
         const splitAngles = luckWheel.props.outsideSplitDatas[luckWheel.props.outsideTabIndex].splitAngles;
-        const outsideChild = await this.createChild(selection, splitAngles, luckWheel.props.gizmoOutsideRadius, "OutsideChild", LuckWheelGizmoConfig.outsideLineColor, LuckWheelGizmoConfig.outsideFillColor);
+        const outsideChild = await this.createChild(parent, splitAngles, luckWheel.props._gizmoOutsideRadius, "OutsideChild", LuckWheelGizmoConfig.outsideLineColor, LuckWheelGizmoConfig.outsideFillColor);
 
         // 分割的区块索引数字
-        const radius = luckWheel.props.gizmoOutsideRadius * 0.8; // 数字显示在圆内，半径不取全长
+        const radius = luckWheel.props._gizmoOutsideRadius * 0.8; // 数字显示在圆内，半径不取全长
         const splitPositions: number[] = this.getSplitPositions(splitAngles, radius);
         this.createNumberTexts(outsideChild, splitPositions, radius, LuckWheelGizmoConfig.outsideLineColor);
         return outsideChild;
     }
 
     /** 创建内转盘角度分割区域的 child */
-    private async createInnerChild(selection: IEditor.IMyNode, luckWheel: IEditor.IMyComponent): Promise<IEditor.IMyNode> {
+    private async createInnerChild(parent: IEditor.IMyNode, luckWheel: IEditor.IMyComponent): Promise<IEditor.IMyNode> {
         const splitAngles = luckWheel.props.innerSplitDatas[luckWheel.props.innerTabIndex].splitAngles;
-        const innerChild = await this.createChild(selection, splitAngles, luckWheel.props.gizmoInnerRadius, "InnerChild", LuckWheelGizmoConfig.innerLineColor, LuckWheelGizmoConfig.innerFillColor);
+        const innerChild = await this.createChild(parent, splitAngles, luckWheel.props._gizmoInnerRadius, "InnerChild", LuckWheelGizmoConfig.innerLineColor, LuckWheelGizmoConfig.innerFillColor);
 
         // 分割的区块索引数字
-        const radius = luckWheel.props.gizmoInnerRadius * 0.8; // 数字显示在圆内，半径不取全长
+        const radius = luckWheel.props._gizmoInnerRadius * 0.8; // 数字显示在圆内，半径不取全长
         const splitPositions: number[] = this.getSplitPositions(splitAngles, radius);
         this.createNumberTexts(innerChild, splitPositions, radius, LuckWheelGizmoConfig.innerLineColor);
         return innerChild;
     }
 
     /** 创建一个角度分割区域的 child */
-    private async createChild(selection: IEditor.IMyNode, splitAngles: number[], radius: number, childName: string, lineColor: string, fillColor: string): Promise<IEditor.IMyNode> {
+    private async createChild(parent: IEditor.IMyNode, splitAngles: number[], radius: number, childName: string, lineColor: string, fillColor: string): Promise<IEditor.IMyNode> {
         const node = await Editor.scene.createNode("Sprite");
 
         // 多边形 graphics 绘图命令
@@ -111,10 +112,10 @@ export class SplitAnglesPropertyField extends IEditor.ArrayField {
         node.props.height = radius * 2;
         node.props.anchorX = 0.5;
         node.props.anchorY = 0.5;
-        node.props.x = selection.props.pivotX;
-        node.props.y = selection.props.pivotY;
+        node.props.x = parent.props.pivotX;
+        node.props.y = parent.props.pivotY;
 
-        selection.addChild(node);
+        parent.addChild(node);
         return node;
     }
 

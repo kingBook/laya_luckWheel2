@@ -32,17 +32,17 @@ enum Flag {
  * luckWheel.mode = LuckWheelMode.SingleRotatePointer;
  * 
  * // 设置指针
- * luckWheel.pointer = new Laya.Sprite();
+ * luckWheel.pointer = xxx;
  * luckWheel.pointerAngleOffset = 90; // 指针素材的角度修正值
  * luckWheel.pointerRpm = 14; // 固定指针的模式，可以不设置
  * 
  * // 设置外转盘
- * luckWheel.outsideDisc = new Laya.Sprite();
+ * luckWheel.outsideDisc = xxx;
  * luckWheel.outsideDiscRpm = 0; // 只旋转指针的模式，可以不设置
  * luckWheel.outsideSplitAngles = [0, 90, 182, 270]; // 切分区块的分割线角度值，[0-359] 小 -> 大
  * 
  * // 设置内转盘（单转盘的模式，可以不设置）
- * luckWheel.innerDisc = new Laya.Sprite();
+ * luckWheel.innerDisc = xxx;
  * luckWheel.innerDiscRpm = 0; // 只旋转指针的模式，可以不设置
  * luckWheel.innerSplitAngles = [0, 90, 182, 270]; // 切分区块的分割线角度值，[0-359] 小 -> 大
  * 
@@ -78,12 +78,12 @@ export class LuckWheel extends Laya.Script {
 
 
     // ===================== Editor start =========================
-    @property({ type: Boolean, private: false, catalog: "Gizmo", tips: "是否在场景视图中显示 Gizmo 绘制的切分圆, 直观地查看角度分割线" })
-    private gizmoVisible: boolean = false;
-    @property({ type: Number, private: false, catalog: "Gizmo", step: 1, fractionDigits: 0, tips: "Gizmo 绘制的外部切分圆半径" })
-    private gizmoOutsideRadius: number = 350;
-    @property({ type: Number, private: false, catalog: "Gizmo", step: 1, fractionDigits: 0, readonly: "data.mode==1||data.mode==2", tips: "Gizmo 绘制的内部切分圆半径" })
-    private gizmoInnerRadius: number = 200;
+    @property({ type: Boolean, private: false, catalog: "Gizmo", tips: "是否在场景视图中显示 Gizmo 绘制的圆, 直观地查看角度分割线" })
+    private _gizmoVisible: boolean = false;
+    @property({ type: Number, private: false, catalog: "Gizmo", step: 1, fractionDigits: 0, tips: "Gizmo 绘制的外圆半径" })
+    private _gizmoOutsideRadius: number = 350;
+    @property({ type: Number, private: false, catalog: "Gizmo", step: 1, fractionDigits: 0, readonly: "data.mode==1||data.mode==2", tips: "Gizmo 绘制的内圆半径" })
+    private _gizmoInnerRadius: number = 200;
     // =====================  Editor end  =========================
 
 
@@ -102,7 +102,7 @@ export class LuckWheel extends Laya.Script {
     public outsideDisc: Laya.Sprite;
     @property({ type: Number, catalog: "Outside", step: 0.1, fractionDigits: 1, range: [-45, 45], tips: "初始的外转盘的转速<度>，可以是负数" })
     public outsideDiscRpm: number = 14;
-    @property({ type: Number, catalog: "Outside", min: 0, step: 1, fractionDigits: 0, tips: "外转盘的盘面索引" })
+    @property({ type: Number, enumSource: "outsideSplitDatasEnumSource", catalog: "Outside", min: 0, step: 1, fractionDigits: 0, tips: "外转盘的盘面索引" })
     public outsideTabIndex: number = 0;
     @property({ type: [SplitData], catalog: "Outside", minArrayLength: 1 })
     public outsideSplitDatas: SplitData[] = [];
@@ -114,11 +114,31 @@ export class LuckWheel extends Laya.Script {
     public innerDiscRpm: number = 14;
     @property({ type: Laya.Sprite, catalog: "Inner", readonly: "data.mode==1||data.mode==2", tips: "内转盘" })
     public innerDisc: Laya.Sprite;
-    @property({ type: Number, min: 0, catalog: "Inner", step: 1, fractionDigits: 0, readonly: "data.mode==1||data.mode==2", tips: "内转盘的盘面索引" })
+    @property({ type: Number, min: 0, enumSource: "innerSplitDatasEnumSource", catalog: "Inner", step: 1, fractionDigits: 0, readonly: "data.mode==1||data.mode==2", tips: "内转盘的盘面索引" })
     public innerTabIndex: number = 0;
     @property({ type: [SplitData], catalog: "Inner", readonly: "data.mode==1||data.mode==2", minArrayLength: 1 })
     public innerSplitDatas: SplitData[] = [];
     // =====================  Inner end   =========================
+
+    // outsideSplitDatas 枚举源 ，这个数据仅用于编辑器
+    @property({ type: [["Record", String]], hidden: true, serializable: false })
+    public get outsideSplitDatasEnumSource() {
+        const result: { name: string, value: number }[] = [];
+        this.outsideSplitDatas.forEach((item, index) => {
+            result[index] = { name: index.toString(), value: index };
+        }, this);
+        return result;
+    }
+
+    // innerSplitDatas 枚举源，这个数据仅用于编辑器
+    @property({ type: [["Record", String]], hidden: true, serializable: false })
+    public get innerSplitDatasEnumSource() {
+        const result: { name: string, value: number }[] = [];
+        this.innerSplitDatas.forEach((item, index) => {
+            result[index] = { name: index.toString(), value: index };
+        }, this);
+        return result;
+    }
 
 
     /** 旋转摩擦系数 */
@@ -484,51 +504,52 @@ class RotationalObject extends Laya.EventDispatcher {
     public update(): void {
         if (this._isRotateEnd) return;
 
-        if (!isNaN(this._rewardAngle)) {
-            // 计算与奖励角还有多少距离
-            const targetAngle = Math.sign(this._rpm) >= 0
-                ? this._rewardAngle + this.extraAngle
-                : (360 - this._rewardAngle) + this.extraAngle; // 根据旋转的方向，加上额外旋转的圈数角
-            const currentAngle = Math.sign(this._rpm) >= 0
-                ? this._angle
-                : 360 - this._angle;
-            const deltaAngle: number = Laya.MathUtil.repeat(targetAngle - currentAngle, 360); // 距离奖励角的度数，根据旋转的方向计算，此值始终为正数
+        // 未得到奖励结果，匀速旋转
+        if (isNaN(this._rewardAngle)) {
+            this.setAngle(this._angle + this._rpm);
+            return;
+        }
 
-            if (this._isEasing) { // 缓动中...
-                let t = 1 - Laya.MathUtil.clamp01(deltaAngle / this.easeAngleLen); // 缓动的进度插值
-                t = t >= 0.999 ? 1 : t;
-                if (t >= 1) { // 当缓动的进度满时，由于小数计算的精度问题，当前角度并不一定就到达目标奖励角
-                    const minRmp = 0.1;
-                    if (deltaAngle > minRmp) { // 给一个最小转速，当与目标奖励角还有距离时，继续以最小转速旋转
-                        this._rpm = Math.sign(this._rpm) * minRmp;
-                        this.setAngle(this._angle + this._rpm);
-                    } else { // 到达目标奖励角，结束旋转
-                        this._isEasing = false; // 结束缓动
-                        this._rpm = 0;
-                        this.setAngle(this._rewardAngle); // 设置角为奖励角避免误差
-                        this._isRotateEnd = true;
-                        // 结束旋转
-                        this.event(RotationalObject.ROTATE_END, this);
-                    }
-                } else {
-                    // 缓动匀速旋转
-                    this._rpm = Math.sign(this._rpm) * Math.ceil(Laya.MathUtil.lerp(this.easeThreshold, 0, t) * 10) / 10; // 速度保留一个小数
+        // 计算与奖励角还有多少距离
+        const targetAngle = Math.sign(this._rpm) >= 0
+            ? this._rewardAngle + this.extraAngle
+            : (360 - this._rewardAngle) + this.extraAngle; // 根据旋转的方向，加上额外旋转的圈数角
+        const currentAngle = Math.sign(this._rpm) >= 0
+            ? this._angle
+            : 360 - this._angle;
+        const deltaAngle = Laya.MathUtil.repeat(targetAngle - currentAngle, 360); // 距离奖励角的度数，根据旋转的方向计算，此值始终为正数
+
+        if (this._isEasing) { // 缓动中...
+            let t = 1 - Laya.MathUtil.clamp01(deltaAngle / this.easeAngleLen); // 缓动的进度插值
+            t = t >= 0.999 ? 1 : t;
+            if (t >= 1) { // 当缓动的进度满时，由于小数计算的精度问题，当前角度并不一定就到达目标奖励角
+                const minRmp = 0.1;
+                if (deltaAngle > minRmp) { // 给一个最小转速，当与目标奖励角还有距离时，继续以最小转速旋转
+                    this._rpm = Math.sign(this._rpm) * minRmp;
                     this.setAngle(this._angle + this._rpm);
+                } else { // 到达目标奖励角，结束旋转
+                    this._isEasing = false; // 结束缓动
+                    this._rpm = 0;
+                    this.setAngle(this._rewardAngle); // 设置角为奖励角避免误差
+                    this._isRotateEnd = true;
+                    // 结束旋转
+                    this.event(RotationalObject.ROTATE_END, this);
                 }
-            } else if (Math.abs(this._rpm) <= this.easeThreshold) { // 降速旋转，当速度小于缓动的阈值时，开始缓动
-                this._rpm = Math.sign(this._rpm) * this.easeThreshold; // 限制旋转速度在缓动角度的阈值
-                if (Math.abs(deltaAngle) >= this.easeAngleLen) { // 距离太小，继续走，到达大角度才缓动
-                    // 开始缓动
-                    this._isEasing = true;
-                }
-                this.setAngle(this._angle + this._rpm);
             } else {
-                // 降速旋转
-                this._rpm *= this._rotateFriction;
+                // 缓动匀速旋转
+                this._rpm = Math.sign(this._rpm) * Math.ceil(Laya.MathUtil.lerp(this.easeThreshold, 0, t) * 10) / 10; // 速度保留一个小数
                 this.setAngle(this._angle + this._rpm);
             }
+        } else if (Math.abs(this._rpm) <= this.easeThreshold) { // 降速旋转，当速度小于缓动的阈值时，开始缓动
+            this._rpm = Math.sign(this._rpm) * this.easeThreshold; // 限制旋转速度在缓动角度的阈值
+            if (Math.abs(deltaAngle) >= this.easeAngleLen) { // 距离太小，继续走，到达大角度才缓动
+                // 开始缓动
+                this._isEasing = true;
+            }
+            this.setAngle(this._angle + this._rpm);
         } else {
-            // 未得到奖励结果，匀速旋转
+            // 降速旋转
+            this._rpm *= this._rotateFriction;
             this.setAngle(this._angle + this._rpm);
         }
     }

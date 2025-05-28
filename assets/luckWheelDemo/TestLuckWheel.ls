@@ -42,9 +42,9 @@
           "_$type": "084c02c5-8249-42bc-a85c-41ba3bac30e2",
           "scriptPath": "luckWheelDemo/luckWheel/LuckWheel.ts",
           "mode": 4,
-          "gizmoVisible": false,
-          "gizmoOutsideRadius": 314,
-          "gizmoInnerRadius": 152,
+          "_gizmoVisible": false,
+          "_gizmoOutsideRadius": 350,
+          "_gizmoInnerRadius": 200,
           "pointer": {
             "_$ref": "jrcr0gae"
           },
@@ -61,10 +61,7 @@
               "itemsContainer": null,
               "splitAngles": [
                 0,
-                80.4,
-                123.6,
-                209.1,
-                306.7
+                180
               ]
             },
             {
@@ -86,11 +83,8 @@
               "_$type": "5b4f72f3-bcd1-40e1-b855-67565323905b",
               "itemsContainer": null,
               "splitAngles": [
-                31.8,
-                93.3,
-                122.7,
-                201.8,
-                284.3
+                0,
+                180
               ]
             }
           ]
