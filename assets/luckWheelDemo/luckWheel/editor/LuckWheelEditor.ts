@@ -71,7 +71,7 @@ export class LuckWheelCustomEditor extends IEditorEnv.CustomEditor {
             this._outsidePolygon.touchable = false; // 不可交互
         }
         // 画外分割线
-        const angles = this._luckWheel.outsideSplitDatas[this._luckWheel.outsideTabIndex].splitAngles;
+        const angles = this._luckWheel.outsideSplitDatas[this._luckWheel.outsideSelectIndex].splitAngles;
         this.drawSplitLines(this._outsidePolygon, angles, (this._luckWheel as any)._gizmoOutsideRadius);
     }
 
@@ -85,7 +85,7 @@ export class LuckWheelCustomEditor extends IEditorEnv.CustomEditor {
             this._innerPolygon.touchable = false; // 不可交互
         }
         // 画内分割线
-        const angles = this._luckWheel.innerSplitDatas[this._luckWheel.innerTabIndex].splitAngles;
+        const angles = this._luckWheel.innerSplitDatas[this._luckWheel.innerSelectIndex].splitAngles;
         this.drawSplitLines(this._innerPolygon, angles, (this._luckWheel as any)._gizmoInnerRadius);
     }
 

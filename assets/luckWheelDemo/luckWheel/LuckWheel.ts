@@ -46,8 +46,7 @@ enum Flag {
  * luckWheel.innerDiscRpm = 0; // 只旋转指针的模式，可以不设置
  * luckWheel.innerSplitAngles = [0, 90, 182, 270]; // 切分区块的分割线角度值，[0-359] 小 -> 大
  * 
- * // 其他接口
- * 
+ * // ================ 其他接口 ======================================
  * // 开始旋转
  * luckWheel.startRotate();
  * // 设置奖励的索引（需开始旋转一会，再调用）
@@ -78,7 +77,7 @@ export class LuckWheel extends Laya.Script {
 
 
     // ===================== Editor start =========================
-    @property({ type: Boolean, private: false, catalog: "Gizmo", tips: "是否在场景视图中显示 Gizmo 绘制的圆, 直观地查看角度分割线" })
+    @property({ type: Boolean, private: false, catalog: "Gizmo", tips: "是否在场景视图中显示 Gizmo 绘制的圆, 直观地查看角度分割线, 注意：仅显示 outsideSelectIndex 和 innerSelectIndex 指定的圆" })
     private _gizmoVisible: boolean = false;
     @property({ type: Number, private: false, catalog: "Gizmo", step: 1, fractionDigits: 0, tips: "Gizmo 绘制的外圆半径" })
     private _gizmoOutsideRadius: number = 350;
@@ -100,27 +99,21 @@ export class LuckWheel extends Laya.Script {
     // ===================== Outside start  =======================
     @property({ type: Laya.Sprite, catalog: "Outside", tips: "外转盘" })
     public outsideDisc: Laya.Sprite;
+
     @property({ type: Number, catalog: "Outside", step: 0.1, fractionDigits: 1, range: [-45, 45], tips: "初始的外转盘的转速<度>，可以是负数" })
     public outsideDiscRpm: number = 14;
-    @property({ type: Number, enumSource: "outsideSplitDatasEnumSource", catalog: "Outside", min: 0, step: 1, fractionDigits: 0, tips: "外转盘的盘面索引" })
-    public outsideTabIndex: number = 0;
-    @property({ type: [SplitData], catalog: "Outside", minArrayLength: 1 })
+
+    @property({ type: Number, private: true }) //  private：true，不会出现在IDE的属性面板上，只是用来存储输入
+    private _outsideSelectIndex: number = 0;
+
+    /** 外转盘选择的分割数据索引 */
+    @property({ type: Number, catalog: "Outside", serializable: false, enumSource: "outsideSplitDatasEnumSource", min: 0, step: 1, fractionDigits: 0, tips: "外转盘选择的分割数据索引" }) // serializable：false，不会被保存到场景文件中
+    public get outsideSelectIndex(): number { return this._outsideSelectIndex; }
+
+    @property({ type: [SplitData], catalog: "Outside", minArrayLength: 1, tips: "外转盘的分割数据数组" })
     public outsideSplitDatas: SplitData[] = [];
-    // =====================  Outside end   =======================
 
-
-    // ===================== Inner start  =========================
-    @property({ type: Number, catalog: "Inner", readonly: "data.mode==1||data.mode==2", step: 0.1, fractionDigits: 1, range: [-45, 45], tips: "初始的内转盘的转速<度>，可以是负数" })
-    public innerDiscRpm: number = 14;
-    @property({ type: Laya.Sprite, catalog: "Inner", readonly: "data.mode==1||data.mode==2", tips: "内转盘" })
-    public innerDisc: Laya.Sprite;
-    @property({ type: Number, min: 0, enumSource: "innerSplitDatasEnumSource", catalog: "Inner", step: 1, fractionDigits: 0, readonly: "data.mode==1||data.mode==2", tips: "内转盘的盘面索引" })
-    public innerTabIndex: number = 0;
-    @property({ type: [SplitData], catalog: "Inner", readonly: "data.mode==1||data.mode==2", minArrayLength: 1 })
-    public innerSplitDatas: SplitData[] = [];
-    // =====================  Inner end   =========================
-
-    // outsideSplitDatas 枚举源 ，这个数据仅用于编辑器
+    // outsideSelectIndex 枚举源 ，仅用于编辑器
     @property({ type: [["Record", String]], hidden: true, serializable: false })
     public get outsideSplitDatasEnumSource() {
         const result: { name: string, value: number }[] = [];
@@ -129,8 +122,24 @@ export class LuckWheel extends Laya.Script {
         }, this);
         return result;
     }
+    // =====================  Outside end   =======================
 
-    // innerSplitDatas 枚举源，这个数据仅用于编辑器
+
+    // ===================== Inner start  =========================
+    @property({ type: Number, catalog: "Inner", readonly: "data.mode==1||data.mode==2", step: 0.1, fractionDigits: 1, range: [-45, 45], tips: "初始的内转盘的转速<度>，可以是负数" })
+    public innerDiscRpm: number = 14;
+
+    @property({ type: Laya.Sprite, catalog: "Inner", readonly: "data.mode==1||data.mode==2", tips: "内转盘" })
+    public innerDisc: Laya.Sprite;
+
+    @property({ type: Number, private: true }) //  private：true，不会出现在IDE的属性面板上，只是用来存储输入
+    private _innerSelectIndex: number = 0;
+
+    /** 内转盘选择的分割数据索引 */
+    @property({ type: Number, catalog: "Inner", serializable: false, enumSource: "innerSplitDatasEnumSource", min: 0, step: 1, fractionDigits: 0, readonly: "data.mode==1||data.mode==2", tips: "内转盘选择的分割数据索引" }) // serializable：false，不会被保存到场景文件中
+    public get innerSelectIndex(): number { return this._innerSelectIndex; }
+
+    // innerSelectIndex 枚举源，仅用于编辑器
     @property({ type: [["Record", String]], hidden: true, serializable: false })
     public get innerSplitDatasEnumSource() {
         const result: { name: string, value: number }[] = [];
@@ -140,24 +149,24 @@ export class LuckWheel extends Laya.Script {
         return result;
     }
 
+    @property({ type: [SplitData], catalog: "Inner", readonly: "data.mode==1||data.mode==2", minArrayLength: 1, tips: "内转盘的分割数据数组" })
+    public innerSplitDatas: SplitData[] = [];
+    // =====================  Inner end   =========================
+
 
     /** 旋转摩擦系数 */
     private readonly _rotateFriction: number = 0.985;
-
     /** 旋转的中心 */
     private _center: Laya.Point;
     /** 指针半径 */
     private _pointerRadius: number;
-
-    private _flags: number;
-
     /** 指针的角度, [0,360] */
     private _pointerAngle: number;
-
     /** 外转盘奖励结果索引 */
     private _outsideRewardIndex: number;
     /** 内转盘奖励结果索引 */
     private _innerRewardIndex: number;
+    private _flags: number;
 
     private _pointerRotationalObj: RotationalObject;
     private _outsideRotationalObj: RotationalObject;
@@ -169,6 +178,30 @@ export class LuckWheel extends Laya.Script {
     public get pointerAngle(): number { return this._pointerAngle; }
     /** 是否暂停中... */
     public get isPausing(): boolean { return (this._flags & Flag.Pausing) > 0; }
+
+    /** 设置外转盘选择的数据索引，不能超出数组 {@link outsideSplitDatas} 的索引范围 */
+    public set outsideSelectIndex(value: number) {
+        value = Laya.MathUtil.clamp(value, 0, this.outsideSplitDatas.length - 1); // 选择的索引不能超过分割数据数组的范围
+        this._outsideSelectIndex = value;
+        this.outsideSplitDatas.forEach((data, index) => {
+            if (data.itemsContainer) {
+                // 在盘面中显示选中索引指定的容器，其他容器隐藏
+                data.itemsContainer.active = data.itemsContainer.visible = (value === index);
+            }
+        });
+    }
+    
+    /** 设置内转盘选择的数据索引，不能超出数组 {@link innerSplitDatas} 的索引范围 */
+    public set innerSelectIndex(value: number) {
+        value = Laya.MathUtil.clamp(value, 0, this.innerSplitDatas.length - 1); // 选择的索引不能超过分割数据数组的范围
+        this._innerSelectIndex = value;
+        this.innerSplitDatas.forEach((data, index) => {
+            if (data.itemsContainer) {
+                // 在盘面中显示选中索引指定的容器，其他容器隐藏
+                data.itemsContainer.active = data.itemsContainer.visible = (value === index);
+            }
+        });
+    }
 
 
     public onAwake(): void {
@@ -186,6 +219,10 @@ export class LuckWheel extends Laya.Script {
         this._pointerRotationalObj.on(RotationalObject.ROTATE_END, this, this.onRotateEnd);
         this._outsideRotationalObj.on(RotationalObject.ROTATE_END, this, this.onRotateEnd);
         this._innerRotationalObj.on(RotationalObject.ROTATE_END, this, this.onRotateEnd);
+
+        // 调用 setter 方法，在盘面中显示选中索引指定的容器，其他容器隐藏
+        this.outsideSelectIndex = this._outsideSelectIndex;
+        this.innerSelectIndex = this._innerSelectIndex;
 
         Laya.stage.on(Laya.Event.VISIBILITY_CHANGE, this, this.onStageVisibilityChange);
     }
@@ -266,7 +303,7 @@ export class LuckWheel extends Laya.Script {
      */
     public setRewardIndex(outsideRewardIndex: number, innerRewardIndex?: number): void {
         // 设置外奖励索引
-        const outsideSplitAngles = this.outsideSplitDatas[this.outsideTabIndex].splitAngles;
+        const outsideSplitAngles = this.outsideSplitDatas[this.outsideSelectIndex].splitAngles;
         if (outsideRewardIndex < 0 || outsideRewardIndex >= outsideSplitAngles.length) {
             throw new Error(`外转盘奖励索引,必须为正整数且小于分割线的数量 ${outsideSplitAngles.length}, 当前值: ${outsideRewardIndex}`);
         }
@@ -275,7 +312,7 @@ export class LuckWheel extends Laya.Script {
         // 设置内奖励索引
         let innerSplitAngles: number[] = null;
         if (!isNaN(innerRewardIndex)) {
-            innerSplitAngles = this.innerSplitDatas[this.innerTabIndex].splitAngles;
+            innerSplitAngles = this.innerSplitDatas[this.innerSelectIndex].splitAngles;
             if (innerRewardIndex < 0 || innerRewardIndex >= innerSplitAngles.length) {
                 throw new Error(`内转盘奖励索引,必须为正整数且小于分割线的数量 ${innerSplitAngles.length}, 当前值: ${innerRewardIndex}`);
             }
@@ -327,7 +364,7 @@ export class LuckWheel extends Laya.Script {
         out ||= [];
         out.length = 0;
 
-        const outsideSplitAngles = this.outsideSplitDatas[this.outsideTabIndex].splitAngles;
+        const outsideSplitAngles = this.outsideSplitDatas[this.outsideSelectIndex].splitAngles;
         this.getSplitPositions(outsideSplitAngles, radius, isAddCenter, out);
         return out;
     }
@@ -343,7 +380,7 @@ export class LuckWheel extends Laya.Script {
         out ||= [];
         out.length = 0;
 
-        const innerSplitAngles = this.innerSplitDatas[this.innerTabIndex].splitAngles;
+        const innerSplitAngles = this.innerSplitDatas[this.innerSelectIndex].splitAngles;
         this.getSplitPositions(innerSplitAngles, radius, isAddCenter, out);
         return out;
     }
@@ -423,7 +460,6 @@ export class LuckWheel extends Laya.Script {
 
         } else {
             // 从后台切回来时
-
         }
     }
 
@@ -452,7 +488,7 @@ class RotationalObject extends Laya.EventDispatcher {
     /** 旋转结束事件 */
     public static readonly ROTATE_END: string = "rotateEnd";
 
-    /** 当前所在的角 [0,360]*/
+    /** 当前所在的角 [0,360] */
     private _angle: number;
     /** 转速<度> */
     private _rpm: number;
@@ -530,7 +566,7 @@ class RotationalObject extends Laya.EventDispatcher {
                 } else { // 到达目标奖励角，结束旋转
                     this._isEasing = false; // 结束缓动
                     this._rpm = 0;
-                    this.setAngle(this._rewardAngle); // 设置角为奖励角避免误差
+                    this.setAngle(this._rewardAngle); // 设置角度值等于奖励角避免误差
                     this._isRotateEnd = true;
                     // 结束旋转
                     this.event(RotationalObject.ROTATE_END, this);

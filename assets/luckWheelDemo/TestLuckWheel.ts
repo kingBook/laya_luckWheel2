@@ -14,14 +14,14 @@ export class TestLuckWheel extends Laya.Script {
     }
 
     public onKeyDown(evt: Laya.Event): void {
-        if (evt.keyCode === Laya.Keyboard.H) { // H
+        if (evt.keyCode === Laya.Keyboard.H) {
             this._luckWheel.startRotate();
             console.log("开始旋转");
-        } else if (evt.keyCode === Laya.Keyboard.J) { // J
+        } else if (evt.keyCode === Laya.Keyboard.J) {
             // 随机取一个外转盘的开奖结果
-            const outsideRewardIndex: number = Math.trunc(Math.random() * this._luckWheel.outsideSplitDatas[this._luckWheel.outsideTabIndex].splitAngles.length);
+            const outsideRewardIndex: number = Math.trunc(Math.random() * this._luckWheel.outsideSplitDatas[this._luckWheel.outsideSelectIndex].splitAngles.length);
             // 随机取一个内转盘的开奖结果
-            const innerRewardIndex: number = Math.trunc(Math.random() * this._luckWheel.innerSplitDatas[this._luckWheel.innerTabIndex].splitAngles.length);
+            const innerRewardIndex: number = Math.trunc(Math.random() * this._luckWheel.innerSplitDatas[this._luckWheel.innerSelectIndex].splitAngles.length);
             switch (this._luckWheel.mode) {
                 case LuckWheelMode.SingleRotatePointer:
                 case LuckWheelMode.SingleFixedPointer:
@@ -33,9 +33,14 @@ export class TestLuckWheel extends Laya.Script {
                     console.log("得到开奖结果", "外转盘：" + outsideRewardIndex, "内转盘：" + innerRewardIndex);
                     break;
             }
-        } else if (evt.keyCode === Laya.Keyboard.K) { // K
+        } else if (evt.keyCode === Laya.Keyboard.K) {
             this._luckWheel.setPause(!this._luckWheel.isPausing);
             console.log("设置暂停为：", this._luckWheel.isPausing);
+        } else if (evt.keyCode === Laya.Keyboard.L) {
+            this._luckWheel.outsideSelectIndex = Math.trunc(Math.random() * this._luckWheel.outsideSplitDatas.length);
+            this._luckWheel.innerSelectIndex = Math.trunc(Math.random() * this._luckWheel.innerSplitDatas.length);
+            console.log("选择分割数据：", "外转盘：" + this._luckWheel.outsideSelectIndex, "内转盘：" + this._luckWheel.innerSelectIndex);
+
         }
     }
 

@@ -68,7 +68,7 @@ export class SplitAnglesPropertyField extends IEditor.ArrayField {
 
     /** 创建外转盘角度分割区域的 child */
     private async createOutsideChild(parent: IEditor.IMyNode, luckWheel: IEditor.IMyComponent): Promise<IEditor.IMyNode> {
-        const splitAngles = luckWheel.props.outsideSplitDatas[luckWheel.props.outsideTabIndex].splitAngles;
+        const splitAngles = this.target.datas[0];
         const outsideChild = await this.createChild(parent, splitAngles, luckWheel.props._gizmoOutsideRadius, "OutsideChild", LuckWheelGizmoConfig.outsideLineColor, LuckWheelGizmoConfig.outsideFillColor);
 
         // 分割的区块索引数字
@@ -80,7 +80,7 @@ export class SplitAnglesPropertyField extends IEditor.ArrayField {
 
     /** 创建内转盘角度分割区域的 child */
     private async createInnerChild(parent: IEditor.IMyNode, luckWheel: IEditor.IMyComponent): Promise<IEditor.IMyNode> {
-        const splitAngles = luckWheel.props.innerSplitDatas[luckWheel.props.innerTabIndex].splitAngles;
+        const splitAngles = this.target.datas[0];
         const innerChild = await this.createChild(parent, splitAngles, luckWheel.props._gizmoInnerRadius, "InnerChild", LuckWheelGizmoConfig.innerLineColor, LuckWheelGizmoConfig.innerFillColor);
 
         // 分割的区块索引数字
