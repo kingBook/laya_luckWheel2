@@ -56,7 +56,7 @@
         {
           "_$type": "084c02c5-8249-42bc-a85c-41ba3bac30e2",
           "scriptPath": "luckWheelDemo/luckWheel/LuckWheel.ts",
-          "mode": 1,
+          "_mode": 4,
           "_gizmoVisible": false,
           "_gizmoOutsideRadius": 350,
           "_gizmoInnerRadius": 200,
