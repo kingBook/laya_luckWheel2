@@ -56,7 +56,7 @@
         {
           "_$type": "084c02c5-8249-42bc-a85c-41ba3bac30e2",
           "scriptPath": "luckWheelDemo/luckWheel/LuckWheel.ts",
-          "_mode": 4,
+          "_mode": 1,
           "_gizmoVisible": false,
           "_gizmoOutsideRadius": 350,
           "_gizmoInnerRadius": 200,
@@ -64,11 +64,11 @@
             "_$ref": "jrcr0gae"
           },
           "pointerAngleOffset": 90,
-          "pointerRpm": 14,
+          "initPointerRpm": 14,
           "outsideDisc": {
             "_$ref": "4mj7wmn8"
           },
-          "outsideDiscRpm": 13.4,
+          "initOutsideDiscRpm": 14,
           "_outsideSelectIndex": 0,
           "outsideSplitDatas": [
             {
@@ -110,7 +110,7 @@
               ]
             }
           ],
-          "innerDiscRpm": -26.9,
+          "initInnerDiscRpm": 14,
           "innerDisc": {
             "_$ref": "6a1eqsdh"
           },
@@ -2723,12 +2723,14 @@
           "_$id": "6a1eqsdh",
           "_$type": "Sprite",
           "name": "InnerDisc",
+          "active": false,
           "x": 375,
           "y": 375,
           "width": 750,
           "height": 750,
           "anchorX": 0.5,
           "anchorY": 0.5,
+          "visible": false,
           "_$child": [
             {
               "_$id": "7bnchhu7",

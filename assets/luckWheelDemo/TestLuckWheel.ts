@@ -15,13 +15,13 @@ export class TestLuckWheel extends Laya.Script {
 
     public onKeyDown(evt: Laya.Event): void {
         if (evt.keyCode === Laya.Keyboard.H) {
-            this._luckWheel.startRotate();
+            this._luckWheel.startRotating();
             console.log("开始旋转");
         } else if (evt.keyCode === Laya.Keyboard.J) {
             // 随机取一个外转盘的开奖结果
-            const outsideRewardIndex: number = Math.trunc(Math.random() * this._luckWheel.outsideSplitDatas[this._luckWheel.outsideSelectIndex].splitAngles.length);
+            const outsideRewardIndex: number = Math.trunc(Math.random() * this._luckWheel.currentOutsideSplitAnges.length);
             // 随机取一个内转盘的开奖结果
-            const innerRewardIndex: number = Math.trunc(Math.random() * this._luckWheel.innerSplitDatas[this._luckWheel.innerSelectIndex].splitAngles.length);
+            const innerRewardIndex: number = Math.trunc(Math.random() * this._luckWheel.currentInnerSplitAnges.length);
             switch (this._luckWheel.mode) {
                 case LuckWheelMode.SingleRotatePointer:
                 case LuckWheelMode.SingleFixedPointer:
