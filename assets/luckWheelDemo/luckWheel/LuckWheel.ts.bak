@@ -479,7 +479,7 @@ export class LuckWheel extends Laya.Script {
     /**
      * 根据角度获取分割后的扇形区域索引（根据角度分割线取，计算时包含起始角度线，不包含末尾角度线）
      * @param angle 角度 [0, 360]
-     * @param splitAngles 转盘分割线角度数组（数组内元素的值区间为 [-180, 180]）
+     * @param splitAngles 转盘分割线角度数组（数组内元素的值区间为 [0, 359]）
      * @returns 返回索引，区间为: [0, {@link splitAngles}.length]
      */
     private getIndexByAngle(angle: number, splitAngles: number[]): number {
@@ -487,21 +487,24 @@ export class LuckWheel extends Laya.Script {
         angle = Laya.MathUtil.repeat(angle, 360);
 
         let result = -1;
+
         for (let i = 0, len = splitAngles.length; i < len; i++) {
-            const nextI = (i + 1) % len;
-            const min = Laya.MathUtil.repeat(splitAngles[i], 360);
-
-            let max = Laya.MathUtil.repeat(splitAngles[nextI], 360);
-            if (max < min) max += 360;
-
-            let inRange = angle >= min && angle < max;
-            inRange ||= angle + 360 >= min && angle + 360 < max;
-            if (inRange) {
+            // 当前角
+            const curAngle = splitAngles[i];
+            // 下一个角
+            let nextAngle = splitAngles[i + 1];
+            if (i >= len - 1) {
+                // 到达末尾索引时，取（360+起始角）
+                nextAngle = (360 + splitAngles[0]);
+                // 奖励角小于当前角时，也要+360才能正确计算
+                if (angle < curAngle) angle += 360;
+            }
+            // 区间处于 [curAngle, nextAngle) 则找到了索引
+            if (angle >= curAngle && angle < nextAngle) {
                 result = i;
                 break;
             }
         }
-
         if (result === -1) {
             throw new Error(`根据奖励角未能找到奖励索引, 奖励角为：${angle}`);
         }
@@ -541,12 +544,8 @@ export class LuckWheel extends Laya.Script {
 
         for (let i = 0, len = splitAngles.length; i < len; i++) {
             const nextI = (i + 1) % len;
-
-            const min = Laya.MathUtil.repeat(splitAngles[i], 360);
-
-            let max = Laya.MathUtil.repeat(splitAngles[nextI], 360);
-            if (max < min) max += 360;
-
+            const min = splitAngles[i];
+            const max = i >= len - 1 ? (360 + splitAngles[0]) : splitAngles[nextI];
             const rad = Laya.Utils.toRadian(Laya.MathUtil.lerp(min, max, 0.5));
             let x = Math.cos(rad) * radius;
             let y = Math.sin(rad) * radius;
@@ -562,26 +561,24 @@ export class LuckWheel extends Laya.Script {
     /**
      * 根据奖励索引返回奖励的角度
      * @param rewardIndex 转盘奖励索引
-     * @param splitAngles 转盘分割线角度数组（数组内元素的值区间为 [-180, 180]）
+     * @param splitAngles 转盘分割线角度数组（数组内元素的值区间为 [0, 359]）
      * @returns 返回角度 [0, 360]
      */
     private getRewardAngleByIndex(rewardIndex: number, splitAngles: number[]): number {
-        const nextI = (rewardIndex + 1) % splitAngles.length;
         // 区块的下限角
-        const min = Laya.MathUtil.repeat(splitAngles[rewardIndex], 360);
-        // 区块的上限角
-        let max = Laya.MathUtil.repeat(splitAngles[nextI], 360);
-        if (max < min) max += 360;
+        const min = splitAngles[rewardIndex];
+        // 区块的上限角，到达分割线数组最大索引时取 (360+splitAngles[0])
+        const max = rewardIndex >= splitAngles.length - 1 ? (360 + splitAngles[0]) : splitAngles[rewardIndex + 1];
 
         const t = 0.5;
-        let rewardAngle = Laya.MathUtil.lerp(min, max, t);
-        rewardAngle = Laya.MathUtil.repeat(rewardAngle, 360);
+        let rewardAngle = Laya.MathUtil.lerp(min, max, t); // splitAngles[0]>0 时，此值可能大于 360
 
         // 固定指针时，计算指针角度偏移
         if ((this.mode & LuckWheelMode.SingleFixedPointer) || (this.mode & LuckWheelMode.DoubleFixedPointer)) {
             rewardAngle = 360 - rewardAngle; // 与 splitAngles[0] 角度分割线对齐
             rewardAngle = Laya.MathUtil.repeat(rewardAngle + this._pointerAngle, 360); // 加上指针角度偏移
         }
+
         return rewardAngle;
     }
 
