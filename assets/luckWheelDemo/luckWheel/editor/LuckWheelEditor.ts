@@ -71,8 +71,9 @@ export class LuckWheelCustomEditor extends IEditorEnv.CustomEditor {
             this._outsidePolygon.touchable = false; // 不可交互
         }
         // 画外分割线
+        const angleOffset = this._luckWheel.outsideSplitDatas[this._luckWheel.outsideSelectIndex].angleOffset;
         const angles = this._luckWheel.outsideSplitDatas[this._luckWheel.outsideSelectIndex].splitAngles;
-        this.drawSplitLines(this._outsidePolygon, angles, (this._luckWheel as any)._gizmoOutsideRadius);
+        this.drawSplitLines(this._outsidePolygon, angleOffset, angles, (this._luckWheel as any)._gizmoOutsideRadius);
     }
 
     /** 绘制内部的多边形 */
@@ -85,27 +86,30 @@ export class LuckWheelCustomEditor extends IEditorEnv.CustomEditor {
             this._innerPolygon.touchable = false; // 不可交互
         }
         // 画内分割线
+        const angleOffset = this._luckWheel.innerSplitDatas[this._luckWheel.innerSelectIndex].angleOffset;
         const angles = this._luckWheel.innerSplitDatas[this._luckWheel.innerSelectIndex].splitAngles;
-        this.drawSplitLines(this._innerPolygon, angles, (this._luckWheel as any)._gizmoInnerRadius);
+        this.drawSplitLines(this._innerPolygon, angleOffset, angles, (this._luckWheel as any)._gizmoInnerRadius);
     }
 
     /** 绘制区块分割线 */
-    private drawSplitLines(polygon: IEditorEnv.IGizmoPolygon, splitAngles: number[], radius: number): void {
+    private drawSplitLines(polygon: IEditorEnv.IGizmoPolygon, angleOffset: number, splitAngles: number[], radius: number): void {
         polygon.points.length = 0; // 清空
 
         let angleIndex = 0; // 分割线角度数组的索引
 
+        angleOffset *= Math.PI / 180;
+
         for (let i = 0; i < 360; i++) {
             let rad = Laya.Utils.toRadian(i);
-            let x = Math.cos(rad) * radius * this.owner.globalScaleX;
-            let y = Math.sin(rad) * radius * this.owner.globalScaleY;
+            let x = Math.cos(rad + angleOffset) * radius * this.owner.globalScaleX;
+            let y = Math.sin(rad + angleOffset) * radius * this.owner.globalScaleY;
             polygon.points.push(x, y);
 
             // 距离分割线角<=1度，则添加分割线点
             if (angleIndex < splitAngles.length && splitAngles[angleIndex] - i <= 1) {
                 rad = Laya.Utils.toRadian(splitAngles[angleIndex]);
-                x = Math.cos(rad) * radius * this.owner.globalScaleX;
-                y = Math.sin(rad) * radius * this.owner.globalScaleY;
+                x = Math.cos(rad + angleOffset) * radius * this.owner.globalScaleX;
+                y = Math.sin(rad + angleOffset) * radius * this.owner.globalScaleY;
                 polygon.points.push(x, y);
                 polygon.points.push(0, 0);
                 polygon.points.push(x, y);
