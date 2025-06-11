@@ -14,7 +14,7 @@ export class TestLuckWheel extends Laya.Script {
         this._luckWheel = this.owner.parent.getChild("LuckWheel").getComponent(LuckWheel);
         this._luckWheel.owner.on(LuckWheel.ROTATE_END, this, this.onRotateEnd);
 
-       
+
     }
 
     public onKeyDown(evt: Laya.Event): void {
@@ -37,6 +37,22 @@ export class TestLuckWheel extends Laya.Script {
                     console.log("得到开奖结果", "外转盘：" + outsideRewardIndex, "内转盘：" + innerRewardIndex);
                     break;
             }
+        } else if (evt.keyCode === Laya.Keyboard.U) {
+            // 随机取一个外转盘的开奖结果
+            const outsideRewardAngle: number = Math.trunc(Math.random() * 360);
+            // 随机取一个内转盘的开奖结果
+            const innerRewardAngle: number = Math.trunc(Math.random() * 360);
+            switch (this._luckWheel.mode) {
+                case LuckWheelMode.SingleRotatePointer:
+                case LuckWheelMode.SingleFixedPointer:
+                    this._luckWheel.setRewardAngle(outsideRewardAngle);
+                    console.log("得到开奖结果", "外转盘:" + this._luckWheel.outsideRewardIndex, "外转盘角度:" + outsideRewardAngle);
+                    break;
+                case LuckWheelMode.DoubleFixedPointer:
+                    this._luckWheel.setRewardAngle(outsideRewardAngle, innerRewardAngle);
+                    console.log("得到开奖结果", "外转盘索引：" + this._luckWheel.outsideRewardIndex, "内转盘索引：" + this._luckWheel.innerRewardIndex, "外转盘角度:" + outsideRewardAngle, "内转盘角度：" + innerRewardAngle,);
+                    break;
+            }
         } else if (evt.keyCode === Laya.Keyboard.K) {
             this._luckWheel.setPause(!this._luckWheel.isPausing);
             console.log("设置暂停为：", this._luckWheel.isPausing);
@@ -45,7 +61,7 @@ export class TestLuckWheel extends Laya.Script {
             this._luckWheel.innerSelectIndex = Math.trunc(Math.random() * this._luckWheel.innerSplitDatas.length);
             console.log("选择分割数据：", "外转盘：" + this._luckWheel.outsideSelectIndex, "内转盘：" + this._luckWheel.innerSelectIndex);
 
-        }else if(evt.keyCode === Laya.Keyboard.M){
+        } else if (evt.keyCode === Laya.Keyboard.M) {
             let poses = this._luckWheel.getOutsideSplitPositions(200, false);
             for (let i = 0; i < poses.length; i += 2) {
                 const x = poses[i];

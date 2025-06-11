@@ -7,7 +7,7 @@ const { regClass, property } = Laya;
  * 自定义 {@link LuckWheel} 组件的场景视图
  */
 @IEditorEnv.customEditor(LuckWheel)
-export class LuckWheelCustomEditor extends IEditorEnv.CustomEditor {
+export class LuckWheelEditor extends IEditorEnv.CustomEditor {
 
     declare owner: Laya.Sprite;
 
@@ -71,9 +71,8 @@ export class LuckWheelCustomEditor extends IEditorEnv.CustomEditor {
             this._outsidePolygon.touchable = false; // 不可交互
         }
         // 画外分割线
-        const angleOffset = this._luckWheel.outsideSplitDatas[this._luckWheel.outsideSelectIndex].angleOffset;
-        const angles = this._luckWheel.outsideSplitDatas[this._luckWheel.outsideSelectIndex].splitAngles;
-        this.drawSplitLines(this._outsidePolygon, angleOffset, angles, (this._luckWheel as any)._gizmoOutsideRadius);
+        const { angleOffset, splitAngles } = this._luckWheel.currentOutsideSplitData;
+        this.drawSplitLines(this._outsidePolygon, angleOffset, splitAngles, (this._luckWheel as any)._gizmoOutsideRadius);
     }
 
     /** 绘制内部的多边形 */
@@ -86,9 +85,8 @@ export class LuckWheelCustomEditor extends IEditorEnv.CustomEditor {
             this._innerPolygon.touchable = false; // 不可交互
         }
         // 画内分割线
-        const angleOffset = this._luckWheel.innerSplitDatas[this._luckWheel.innerSelectIndex].angleOffset;
-        const angles = this._luckWheel.innerSplitDatas[this._luckWheel.innerSelectIndex].splitAngles;
-        this.drawSplitLines(this._innerPolygon, angleOffset, angles, (this._luckWheel as any)._gizmoInnerRadius);
+        const { angleOffset, splitAngles } = this._luckWheel.currentInnerSplitData;
+        this.drawSplitLines(this._innerPolygon, angleOffset, splitAngles, (this._luckWheel as any)._gizmoInnerRadius);
     }
 
     /** 绘制区块分割线 */
@@ -97,19 +95,17 @@ export class LuckWheelCustomEditor extends IEditorEnv.CustomEditor {
 
         let angleIndex = 0; // 分割线角度数组的索引
 
-        angleOffset *= Math.PI / 180;
-
         for (let i = 0; i < 360; i++) {
-            let rad = Laya.Utils.toRadian(i);
-            let x = Math.cos(rad + angleOffset) * radius * this.owner.globalScaleX;
-            let y = Math.sin(rad + angleOffset) * radius * this.owner.globalScaleY;
+            let rad = Laya.Utils.toRadian(i + angleOffset);
+            let x = Math.cos(rad) * radius * this.owner.globalScaleX;
+            let y = Math.sin(rad) * radius * this.owner.globalScaleY;
             polygon.points.push(x, y);
 
             // 距离分割线角<=1度，则添加分割线点
             if (angleIndex < splitAngles.length && splitAngles[angleIndex] - i <= 1) {
-                rad = Laya.Utils.toRadian(splitAngles[angleIndex]);
-                x = Math.cos(rad + angleOffset) * radius * this.owner.globalScaleX;
-                y = Math.sin(rad + angleOffset) * radius * this.owner.globalScaleY;
+                rad = Laya.Utils.toRadian(splitAngles[angleIndex] + angleOffset);
+                x = Math.cos(rad) * radius * this.owner.globalScaleX;
+                y = Math.sin(rad) * radius * this.owner.globalScaleY;
                 polygon.points.push(x, y);
                 polygon.points.push(0, 0);
                 polygon.points.push(x, y);
