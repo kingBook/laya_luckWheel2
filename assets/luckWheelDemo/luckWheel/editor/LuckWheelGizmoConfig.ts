@@ -10,6 +10,9 @@ export class LuckWheelGizmoConfig {
     /** 内转盘填充颜色 */
     public static readonly innerFillColor: string = "#25807f70";
 
+    /** 0 度线颜色 */
+    public static readonly zeroDegLineColor: string = "#ffffff";
+
     /** 线条宽度 */
     public static readonly lineWidth: number = 2;
 }

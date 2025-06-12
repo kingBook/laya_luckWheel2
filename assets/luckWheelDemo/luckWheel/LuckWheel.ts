@@ -342,52 +342,37 @@ export class LuckWheel extends Laya.Script {
      * @param innerRewardIndex 内转盘的奖励索引(正整数)，值区间: [ 0, {@link innerSplitAngles}.length )
      */
     public setRewardIndex(outsideRewardIndex: number, innerRewardIndex?: number): void {
+        // 储存用索引计算得到的奖励角
+        let outsideRewardAngle: number, innerRewardAngle: number;
+
         // 设置外奖励索引
-        const outsideSplitAngles = this.currentOutsideSplitData.splitAngles;
-        if (outsideRewardIndex < 0 || outsideRewardIndex >= outsideSplitAngles.length) {
-            throw new Error(`外转盘奖励索引,必须为正整数且小于分割线的数量 ${outsideSplitAngles.length}, 当前值: ${outsideRewardIndex}`);
+        const outsideSplitData = this.currentOutsideSplitData;
+        if (outsideRewardIndex < 0 || outsideRewardIndex >= outsideSplitData.splitAngles.length) {
+            throw new Error(`外转盘奖励索引,必须为正整数且小于分割线的数量 ${outsideSplitData.splitAngles.length}, 当前值: ${outsideRewardIndex}`);
         }
         this._outsideRewardIndex = outsideRewardIndex;
+        // 获取外奖励角
+        outsideRewardAngle = this.getRewardAngleByIndex(this._outsideRewardIndex, outsideSplitData);
 
         // 设置内奖励索引
-        let innerSplitAngles: number[] = null;
+        let innerSplitData: SplitData = null;
         if (!isNaN(innerRewardIndex)) {
-            innerSplitAngles = this.currentInnerSplitData.splitAngles;
-            if (innerRewardIndex < 0 || innerRewardIndex >= innerSplitAngles.length) {
-                throw new Error(`内转盘奖励索引,必须为正整数且小于分割线的数量 ${innerSplitAngles.length}, 当前值: ${innerRewardIndex}`);
+            innerSplitData = this.currentInnerSplitData;
+            if (innerRewardIndex < 0 || innerRewardIndex >= innerSplitData.splitAngles.length) {
+                throw new Error(`内转盘奖励索引,必须为正整数且小于分割线的数量 ${innerSplitData.splitAngles.length}, 当前值: ${innerRewardIndex}`);
             }
             this._innerRewardIndex = innerRewardIndex;
+            // 获取内奖励角
+            innerRewardAngle = this.getRewardAngleByIndex(this._innerRewardIndex, innerSplitData);
         }
-
-        // 根据奖励索引设置奖励的角度
-        let rewardAngle: number;
-        switch (this.mode) {
-            case LuckWheelMode.SingleRotatePointer:
-                rewardAngle = this.getRewardAngleByIndex(this._outsideRewardIndex, outsideSplitAngles);
-                this._pointerRotationalObj.setRewardAngle(rewardAngle);
-                break;
-            case LuckWheelMode.SingleFixedPointer:
-                rewardAngle = this.getRewardAngleByIndex(this._outsideRewardIndex, outsideSplitAngles);
-                this._outsideRotationalObj.setRewardAngle(rewardAngle);
-                break;
-            case LuckWheelMode.DoubleFixedPointer:
-                rewardAngle = this.getRewardAngleByIndex(this._outsideRewardIndex, outsideSplitAngles);
-                this._outsideRotationalObj.setRewardAngle(rewardAngle);
-
-                if (innerSplitAngles) {
-                    const rewardAngle2 = this.getRewardAngleByIndex(this._innerRewardIndex, innerSplitAngles);
-                    this._innerRotationalObj.setRewardAngle(rewardAngle2);
-                } else {
-                    throw new Error("innerSplitAngles 为 null");
-                }
-                break;
-        }
+        // 设置奖励角
+        this.setRewardAngle(outsideRewardAngle, innerRewardAngle);
     }
 
     /**
-     * 设置奖励角（角度分割线的第一条线为0度）
-     * @param outsideRewardAngle 外转盘的奖励角 [0, 360]
-     * @param innerRewardAngle 内转盘的奖励角 [0, 360]
+     * 设置奖励角
+     * @param outsideRewardAngle 外转盘的奖励角 [0, 360],（角度分割线的第一条线为0度, 顺时针）
+     * @param innerRewardAngle 内转盘的奖励角 [0, 360],（角度分割线的第一条线为0度, 顺时针）
      */
     public setRewardAngle(outsideRewardAngle: number, innerRewardAngle?: number): void {
         // 加上偏移量
@@ -395,7 +380,7 @@ export class LuckWheel extends Laya.Script {
         // 转为 [0, 360]
         outsideRewardAngle = Laya.MathUtil.repeat(outsideRewardAngle, 360);
         // 根据奖励角获取外转盘奖励索引
-        this._outsideRewardIndex = this.getOutsideIndexByAngle(outsideRewardAngle);
+        this._outsideRewardIndex = this.getOutsideIndexByAngle(outsideRewardAngle - this.currentOutsideSplitData.angleOffset);
 
         if (!isNaN(innerRewardAngle)) {
             // 加上偏移量
@@ -403,7 +388,19 @@ export class LuckWheel extends Laya.Script {
             // 转为 [0, 360]
             innerRewardAngle = Laya.MathUtil.repeat(innerRewardAngle, 360);
             // 根据奖励角获取内转盘奖励索引
-            this._innerRewardIndex = this.getInnerIndexByAngle(innerRewardAngle);
+            this._innerRewardIndex = this.getInnerIndexByAngle(innerRewardAngle - this.currentInnerSplitData.angleOffset);
+        }
+
+        // 固定指针时，计算指针角度偏移
+        if ((this.mode & LuckWheelMode.SingleFixedPointer) || (this.mode & LuckWheelMode.DoubleFixedPointer)) {
+            outsideRewardAngle = 360 - outsideRewardAngle; // 与 splitAngles[0] 角度分割线对齐
+            outsideRewardAngle = Laya.MathUtil.repeat(outsideRewardAngle + this._pointerAngle, 360); // 加上指针角度偏移
+
+            if (!isNaN(innerRewardAngle)) {
+                // 固定指针时，计算指针角度偏移
+                innerRewardAngle = 360 - innerRewardAngle; // 与 splitAngles[0] 角度分割线对齐
+                innerRewardAngle = Laya.MathUtil.repeat(innerRewardAngle + this._pointerAngle, 360); // 加上指针角度偏移
+            }
         }
 
         switch (this.mode) {
@@ -422,7 +419,6 @@ export class LuckWheel extends Laya.Script {
                 }
                 break;
         }
-
     }
 
     /** 设置暂停 */
@@ -466,32 +462,39 @@ export class LuckWheel extends Laya.Script {
 
     /**
      * 根据角度获取外转盘分割后的扇形区域索引（根据角度分割线取，计算时包含起始角度线，不包含末尾角度线）
+     * 
+     * 注意：如果参数使用的是指针角度 {@link pointerAngle} 需要加上对应盘面的角度偏移量，例：
+     * ```
+     * const fanIndex = this.luckWheel.getOutsideIndexByAngle(this.luckWheel.pointerAngle - this.luckWheel.currentOutsideSplitData.angleOffset);
+     * ```
      * @param outsideAngle 内转盘中的角度 [0, 360]
      */
     public getOutsideIndexByAngle(outsideAngle: number): number {
-        return this.getIndexByAngle(outsideAngle, this.currentOutsideSplitData);
+        return this.getIndexByAngle(outsideAngle, this.currentOutsideSplitData.splitAngles);
     }
 
     /**
      * 根据角度获取内转盘分割后的扇形区域索引（根据角度分割线取，计算时包含起始角度线，不包含末尾角度线）
+     * 
+     * 注意：如果参数使用的是指针角度 {@link pointerAngle} 需要加上对应盘面的角度偏移量，例：
+     * ```
+     * const fanIndex = this.luckWheel.getInnerIndexByAngle(this.luckWheel.pointerAngle - this.luckWheel.currentInnerSplitData.angleOffset);
+     * ```
      * @param innerAngle 内转盘中的角度 [0, 360]
      */
     public getInnerIndexByAngle(innerAngle: number): number {
-        return this.getIndexByAngle(innerAngle, this.currentInnerSplitData);
+        return this.getIndexByAngle(innerAngle, this.currentInnerSplitData.splitAngles);
     }
 
     /**
      * 根据角度获取分割后的扇形区域索引（根据角度分割线取，计算时包含起始角度线，不包含末尾角度线）
-     * @param angle 角度 [0, 360]
-     * @param splitData 转盘分割数据
+     * @param angle 用来获取索引的的角度, 将直接使用此值与分割线的角度列表的值直接比较，不在 [0, 360] 内时，将被自动转换为: [0, 360]
+     * @param splitAngles 转盘分割线的角度列表, 元素的值区间为: [0, 359]
      * @returns 返回索引，区间为: [0, {@link splitAngles}.length]
      */
-    private getIndexByAngle(angle: number, splitData: SplitData): number {
-        const angleOffset = splitData.angleOffset;
-        const splitAngles = splitData.splitAngles;
-
+    private getIndexByAngle(angle: number, splitAngles: number[]): number {
         // 取 [0, 360]
-        angle = Laya.MathUtil.repeat(angle - angleOffset, 360);
+        angle = Laya.MathUtil.repeat(angle, 360);
 
         let result = -1;
 
@@ -572,24 +575,21 @@ export class LuckWheel extends Laya.Script {
     /**
      * 根据奖励索引返回奖励的角度
      * @param rewardIndex 转盘奖励索引
-     * @param splitAngles 转盘分割线角度数组（数组内元素的值区间为 [0, 359]）
-     * @returns 返回角度 [0, 360]
+     * @param splitData 转盘分割数据
+     * @returns 返回角度 [0, 360],（角度分割线的第一条线为0度, 顺时针）
      */
-    private getRewardAngleByIndex(rewardIndex: number, splitAngles: number[]): number {
+    private getRewardAngleByIndex(rewardIndex: number, splitData: SplitData): number {
+        const splitAngles = splitData.splitAngles;
         // 区块的下限角
         const min = splitAngles[rewardIndex];
         // 区块的上限角，到达分割线数组最大索引时取 (360+splitAngles[0])
         const max = rewardIndex >= splitAngles.length - 1 ? (360 + splitAngles[0]) : splitAngles[rewardIndex + 1];
 
-        const t = 0.5;
+        const t = 0.5; // 取扇形中间
         let rewardAngle = Laya.MathUtil.lerp(min, max, t); // splitAngles[0]>0 时，此值可能大于 360
 
-        // 固定指针时，计算指针角度偏移
-        if ((this.mode & LuckWheelMode.SingleFixedPointer) || (this.mode & LuckWheelMode.DoubleFixedPointer)) {
-            rewardAngle = 360 - rewardAngle; // 与 splitAngles[0] 角度分割线对齐
-            rewardAngle = Laya.MathUtil.repeat(rewardAngle + this._pointerAngle, 360); // 加上指针角度偏移
-        }
-
+        // 角度分割线的第一条线为0度，所以此处减去第一条线的角度，并转为 [0, 360]
+        rewardAngle = Laya.MathUtil.repeat(rewardAngle - splitAngles[0], 360);
         return rewardAngle;
     }
 

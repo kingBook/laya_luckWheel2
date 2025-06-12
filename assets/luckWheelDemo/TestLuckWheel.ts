@@ -42,15 +42,27 @@ export class TestLuckWheel extends Laya.Script {
             const outsideRewardAngle: number = Math.trunc(Math.random() * 360);
             // 随机取一个内转盘的开奖结果
             const innerRewardAngle: number = Math.trunc(Math.random() * 360);
+            let outsideAngleOffset: number, outsideSplitAngle0: number;
             switch (this._luckWheel.mode) {
                 case LuckWheelMode.SingleRotatePointer:
                 case LuckWheelMode.SingleFixedPointer:
                     this._luckWheel.setRewardAngle(outsideRewardAngle);
-                    console.log("得到开奖结果", "外转盘:" + this._luckWheel.outsideRewardIndex, "外转盘角度:" + outsideRewardAngle);
+                    outsideAngleOffset = this._luckWheel.currentOutsideSplitData.angleOffset;
+                    outsideSplitAngle0 = this._luckWheel.currentOutsideSplitData.splitAngles[0];
+                    console.log("得到开奖结果", "外转盘角度:" + outsideRewardAngle, "外转盘索引:" + this._luckWheel.outsideRewardIndex);
+                    console.log("outsideAngleOffset:", outsideAngleOffset, "outsideSplitAngle[0]:", outsideSplitAngle0);
                     break;
                 case LuckWheelMode.DoubleFixedPointer:
                     this._luckWheel.setRewardAngle(outsideRewardAngle, innerRewardAngle);
-                    console.log("得到开奖结果", "外转盘索引：" + this._luckWheel.outsideRewardIndex, "内转盘索引：" + this._luckWheel.innerRewardIndex, "外转盘角度:" + outsideRewardAngle, "内转盘角度：" + innerRewardAngle,);
+                    outsideAngleOffset = this._luckWheel.currentOutsideSplitData.angleOffset;
+                    outsideSplitAngle0 = this._luckWheel.currentOutsideSplitData.splitAngles[0];
+                    const innerAngleOffset = this._luckWheel.currentOutsideSplitData.angleOffset;
+                    const innerSplitAngle0 = this._luckWheel.currentInnerSplitData.splitAngles[0];
+                    console.log("得到开奖结果", "外转盘角度:" + outsideRewardAngle, "内转盘角度：" + innerRewardAngle, "外转盘索引：" + this._luckWheel.outsideRewardIndex, "内转盘索引：" + this._luckWheel.innerRewardIndex);
+                    console.log("outsideAngleOffset:", outsideAngleOffset, "outsideSplitAngle[0]:", outsideSplitAngle0);
+                    console.log("innerAngleOffset:", innerAngleOffset, "innerSplitAngle0:", innerSplitAngle0);
+
+
                     break;
             }
         } else if (evt.keyCode === Laya.Keyboard.K) {

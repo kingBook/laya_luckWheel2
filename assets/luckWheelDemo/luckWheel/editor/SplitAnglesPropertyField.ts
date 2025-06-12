@@ -70,7 +70,8 @@ export class SplitAnglesPropertyField extends IEditor.ArrayField {
     private async createOutsideChild(parent: IEditor.IMyNode, luckWheel: IEditor.IMyComponent): Promise<IEditor.IMyNode> {
         const splitAngles = this.target.datas[0];
         const angleOffset = this.target.owner.parent.target.datas[0].angleOffset;
-        const outsideChild = await this.createChild(parent, angleOffset, splitAngles, luckWheel.props._gizmoOutsideRadius, "OutsideChild", LuckWheelGizmoConfig.outsideLineColor, LuckWheelGizmoConfig.outsideFillColor);
+        const childName = "OutsideChild" + this.target.owner.parent.target.owner.watchProps[0];
+        const outsideChild = await this.createChild(parent, angleOffset, splitAngles, luckWheel.props._gizmoOutsideRadius, childName, LuckWheelGizmoConfig.outsideLineColor, LuckWheelGizmoConfig.outsideFillColor);
 
         // 分割的区块索引数字
         const radius = luckWheel.props._gizmoOutsideRadius * 0.8; // 数字显示在圆内，半径不取全长
@@ -83,7 +84,8 @@ export class SplitAnglesPropertyField extends IEditor.ArrayField {
     private async createInnerChild(parent: IEditor.IMyNode, luckWheel: IEditor.IMyComponent): Promise<IEditor.IMyNode> {
         const splitAngles = this.target.datas[0];
         const angleOffset = this.target.owner.parent.target.datas[0].angleOffset;
-        const innerChild = await this.createChild(parent, angleOffset, splitAngles, luckWheel.props._gizmoInnerRadius, "InnerChild", LuckWheelGizmoConfig.innerLineColor, LuckWheelGizmoConfig.innerFillColor);
+        const childName = "InnerChild" + this.target.owner.parent.target.owner.watchProps[0];
+        const innerChild = await this.createChild(parent, angleOffset, splitAngles, luckWheel.props._gizmoInnerRadius, childName, LuckWheelGizmoConfig.innerLineColor, LuckWheelGizmoConfig.innerFillColor);
 
         // 分割的区块索引数字
         const radius = luckWheel.props._gizmoInnerRadius * 0.8; // 数字显示在圆内，半径不取全长
@@ -97,7 +99,7 @@ export class SplitAnglesPropertyField extends IEditor.ArrayField {
         const node = await Editor.scene.createNode("Sprite");
 
         // 多边形 graphics 绘图命令
-        const cmd = {
+        const polyCmd = {
             fillColor: fillColor,
             lineColor: lineColor,
             lineWidth: LuckWheelGizmoConfig.lineWidth,
@@ -106,8 +108,19 @@ export class SplitAnglesPropertyField extends IEditor.ArrayField {
             y: radius,
             _$type: "DrawPolyCmd"
         }
-        this.getSplitPolygonPoints(angleOffset, splitAngles, radius, cmd.points); // 设置多边形顶点
-        node.props._gcmds = [cmd];
+        this.getSplitPolygonPoints(angleOffset, splitAngles, radius, polyCmd.points); // 设置多边形顶点
+        // 0 度直线 graphics 绘图命令
+        const zeroDeglineCmd = {
+            _$type: "DrawLineCmd",
+            fromX: 0.5,
+            fromY: 0.5,
+            toX: 1.05,
+            toY: 0.5,
+            percent: true,
+            lineWidth: LuckWheelGizmoConfig.lineWidth,
+            lineColor: LuckWheelGizmoConfig.zeroDegLineColor
+        }
+        node.props._gcmds = [polyCmd, zeroDeglineCmd];
 
         node.props.name = childName;
         node.props.width = radius * 2;
