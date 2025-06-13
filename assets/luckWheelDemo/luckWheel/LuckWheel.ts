@@ -44,12 +44,12 @@ enum Flag {
  * // 设置外转盘
  * luckWheel.outsideDisc = xxx;
  * luckWheel.initOutsideDiscRpm = 0; // 只旋转指针的模式，可以不设置
- * luckWheel.outsideSplitAngles = [splitData,...];
+ * luckWheel.outsideSplitDatas = [splitData,...];
  * 
  * // 设置内转盘（单转盘的模式，可以不设置）
  * luckWheel.innerDisc = xxx;
  * luckWheel.initInnerDiscRpm = 0; // 只旋转指针的模式，可以不设置
- * luckWheel.innerSplitAngles = [splitData,...]; // 切分区块的分割线角度值，[0-359] 小 -> 大
+ * luckWheel.innerSplitDatas = [splitData,...]; // 切分区块的分割线角度值，[0-359] 小 -> 大
  * 
  * // ================ 其他接口 ======================================
  * // 开始旋转
