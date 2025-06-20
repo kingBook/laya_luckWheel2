@@ -7,8 +7,6 @@ const { regClass, property } = Laya;
 export class TestLuckWheel extends Laya.Script {
 
     private _luckWheel: LuckWheel;
-    @property({ type: Laya.Prefab })
-    spritePrefab: Laya.Prefab;
 
     public onAwake(): void {
         this._luckWheel = this.owner.parent.getChild("LuckWheel").getComponent(LuckWheel);
@@ -73,15 +71,6 @@ export class TestLuckWheel extends Laya.Script {
             this._luckWheel.innerSelectIndex = Math.trunc(Math.random() * this._luckWheel.innerSplitDatas.length);
             console.log("选择分割数据：", "外转盘：" + this._luckWheel.outsideSelectIndex, "内转盘：" + this._luckWheel.innerSelectIndex);
 
-        } else if (evt.keyCode === Laya.Keyboard.M) {
-            let poses = this._luckWheel.getOutsideSplitPositions(200, false);
-            for (let i = 0; i < poses.length; i += 2) {
-                const x = poses[i];
-                const y = poses[i + 1];
-                let sp = this.spritePrefab.create() as Laya.Sprite;
-                sp.pos(x, y);
-                this.owner.addChild(sp);
-            }
         }
     }
 

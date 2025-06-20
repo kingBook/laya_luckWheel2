@@ -467,7 +467,7 @@ export class LuckWheel extends Laya.Script {
      * ```
      * const fanIndex = this.luckWheel.getOutsideIndexByAngle(this.luckWheel.pointerAngle - this.luckWheel.currentOutsideSplitData.angleOffset);
      * ```
-     * @param outsideAngle 内转盘中的角度 [0, 360]
+     * @param outsideAngle 外转盘中的角度 [0, 360]
      */
     public getOutsideIndexByAngle(outsideAngle: number): number {
         return this.getIndexByAngle(outsideAngle, this.currentOutsideSplitData.splitAngles);

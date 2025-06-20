@@ -6,9 +6,16 @@
   "right": 0,
   "top": 0,
   "bottom": 0,
-  "name": "Scene2D",
+  "name": "TestLuckWheel",
   "width": 750,
   "height": 1600,
+  "_$comp": [
+    {
+      "_$type": "1d9d725b-3556-4384-812f-a0ce3adb2a0b",
+      "scriptPath": "luckWheelDemo/TestLuckWheel.ts",
+      "spritePrefab": null
+    }
+  ],
   "_$child": [
     {
       "_$id": "skyyo6hb",
@@ -24,27 +31,6 @@
       "color": "#ffffff",
       "valign": "middle",
       "alignItems": "top"
-    },
-    {
-      "_$id": "rong9sdq",
-      "_$type": "Sprite",
-      "name": "TestLuckWheel",
-      "x": 375,
-      "y": 800,
-      "width": 100,
-      "height": 100,
-      "anchorX": 0.5,
-      "anchorY": 0.5,
-      "_$comp": [
-        {
-          "_$type": "1d9d725b-3556-4384-812f-a0ce3adb2a0b",
-          "scriptPath": "luckWheelDemo/TestLuckWheel.ts",
-          "spritePrefab": {
-            "_$uuid": "d181e698-1777-404d-a55c-db4fe83c429e",
-            "_$type": "Prefab"
-          }
-        }
-      ]
     },
     {
       "_$id": "8kko1mee",
