@@ -597,7 +597,7 @@ export class LuckWheel extends Laya.Script {
      * 设置指针的角度
      * @param value 角度值
      */
-    private setPointerAngle(value: number): void {
+    public setPointerAngle(value: number): void {
         this._pointerAngle = Laya.MathUtil.repeat(value, 360);
         // 旋转指针
         let pointerRadian = Laya.Utils.toRadian(this._pointerAngle);

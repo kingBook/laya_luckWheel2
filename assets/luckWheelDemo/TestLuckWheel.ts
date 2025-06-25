@@ -9,7 +9,7 @@ export class TestLuckWheel extends Laya.Script {
     private _luckWheel: LuckWheel;
 
     public onAwake(): void {
-        this._luckWheel = this.owner.parent.getChild("LuckWheel").getComponent(LuckWheel);
+        this._luckWheel = this.owner.getChild("LuckWheel").getComponent(LuckWheel);
         this._luckWheel.owner.on(LuckWheel.ROTATE_END, this, this.onRotateEnd);
 
 
