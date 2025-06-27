@@ -142,14 +142,13 @@ export class LuckWheel extends Laya.Script {
 
 
     // ===================== Inner start  =========================
-    /** 初始的内转盘的转速<度>，可以是负数 */
-    @property({ type: Number, catalog: "Inner", readonly: "data.mode==1||data.mode==2", step: 0.1, fractionDigits: 1, range: [-45, 45], tips: "初始的内转盘的转速<度>，可以是负数" })
-    public initInnerDiscRpm: number = 9;
-
     /** 内转盘 */
     @property({ type: Laya.Sprite, catalog: "Inner", readonly: "data.mode==1||data.mode==2", tips: "内转盘" })
     public innerDisc: Laya.Sprite;
-
+    /** 初始的内转盘的转速<度>，可以是负数 */
+    @property({ type: Number, catalog: "Inner", readonly: "data.mode==1||data.mode==2", step: 0.1, fractionDigits: 1, range: [-45, 45], tips: "初始的内转盘的转速<度>，可以是负数" })
+    public initInnerDiscRpm: number = 9;
+    
     @property({ type: Number, private: true }) //  private：true，不会出现在IDE的属性面板上，只是用来存储输入
     private _innerSelectIndex: number = 0;
     /** 内转盘选择的分割数据索引 */
@@ -689,9 +688,9 @@ class RotationalObject extends Laya.EventDispatcher {
 
     /**
      * 初始化
-     * @param angle 
+     * @param angle 当前所在的角 [0,360]
      * @param rpmTarget 旋转启动后，慢慢加速到达的目标速度 
-     * @param rotateFriction 
+     * @param rotateFriction 旋转摩擦系数
      */
     public init(angle: number, rpmTarget: number, rotateFriction: number = 0.985): void {
         this.setAngle(angle);
