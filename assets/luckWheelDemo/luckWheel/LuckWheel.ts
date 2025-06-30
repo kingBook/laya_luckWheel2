@@ -734,19 +734,17 @@ export class RotationalObject extends Laya.EventDispatcher {
             let t = 1 - Laya.MathUtil.clamp01(deltaAngle / this.easeAngleLen); // 缓动的进度插值
             t = t >= 0.999 ? 1 : t;
 
+            // 缓动是否已完成
+            let isEasingFinish = false;
+
             if (t >= 1) { // 当缓动的进度满时，由于小数计算的精度问题，当前角度并不一定就到达目标奖励角
                 if (deltaAngle > this.minRpm) { // 给一个最小转速，当与目标奖励角还有距离时，继续以最小转速旋转
                     this._rpm = Math.sign(this._rpm) * this.minRpm;
                     this.setAngle(this._angle + this._rpm);
                     this.isShowLogMsg && console.log("t>=1, 但与奖励还有很距离，继续以最小转速旋转");
                 } else { // 到达目标奖励角，结束旋转
+                    isEasingFinish = true;
                     this.isShowLogMsg && console.log(`到达目标奖励角:${this._rewardAngle}，结束旋转`);
-                    this._isEasing = false; // 结束缓动
-                    this._rpm = 0;
-                    this.setAngle(this._rewardAngle); // 设置角度值等于奖励角避免误差
-                    this._isRotateEnd = true;
-                    // 结束旋转
-                    this.event(RotationalObject.ROTATE_END, this);
                 }
             } else {
                 // 缓动旋转
@@ -759,8 +757,18 @@ export class RotationalObject extends Laya.EventDispatcher {
                     this.setAngle(this._angle + this._rpm);
                     this.isShowLogMsg && console.log(`缓动中 t<1 t:${t}, rpm:${this._rpm}`);
                 } else {
-                    this.setAngle(this._rewardAngle);
+                    isEasingFinish = true;
+                    this.isShowLogMsg && console.log(`缓动中当前速度超过奖励角，结束旋转`);
                 }
+            }
+
+            if (isEasingFinish) {
+                this._isEasing = false; // 结束缓动
+                this._rpm = 0;
+                this.setAngle(this._rewardAngle); // 设置角度值等于奖励角避免误差
+                this._isRotateEnd = true;
+                // 结束旋转
+                this.event(RotationalObject.ROTATE_END, this);
             }
         } else if (Math.abs(this._rpm) <= this._easeThreshold) { // 降速旋转，当速度小于缓动的阈值时，开始缓动
             this._rpm = Math.sign(this._rpm) * this._easeThreshold; // 限制旋转速度在缓动角度的阈值
