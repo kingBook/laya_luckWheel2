@@ -262,6 +262,8 @@ export class LuckWheel extends Laya.Script {
         this._center = new Laya.Point(this.owner.pivotX, this.owner.pivotY);
         // 计算指针半径
         this._pointerRadius = this._center.distance(this.pointer.x, this.pointer.y);
+        // 指针角度
+        this.setPointerAngle(Laya.Utils.toAngle(Math.atan2(this.pointer.y - this._center.y, this.pointer.x - this._center.x)));
 
         // 创建旋转的对象
         this._pointerRotationalObj = new RotationalObject();
@@ -606,6 +608,69 @@ export class LuckWheel extends Laya.Script {
         this.pointer.rotation = this._pointerAngle + this.pointerAngleOffset;
     }
 
+    /**
+     * 设置旋转对象角度，并同步内外转盘或指针的角度
+     * @param outsideRotation 外转盘旋转对象的角度值（{@link outsideDisc}.rotation），如果是单转盘旋转指针模式则表示指针旋转对象的角度值 ({@link pointer}.rotation - {@link pointerAngleOffset})
+     * @param innerRotation 内转盘旋转对象的角度值（{@link innerDisc}.rotation）
+     */
+    public setRotationalObjectAngle(outsideRotation: number, innerRotation: number = NaN): void {
+        switch (this.mode) {
+            case LuckWheelMode.SingleRotatePointer:
+                this._pointerRotationalObj.setAngle(outsideRotation);
+                this.setPointerAngle(this._pointerRotationalObj.angle);
+                break;
+            case LuckWheelMode.SingleFixedPointer:
+                this._outsideRotationalObj.setAngle(outsideRotation);
+                this.outsideDisc.rotation = this._outsideRotationalObj.angle;
+                break;
+            case LuckWheelMode.DoubleFixedPointer:
+                this._outsideRotationalObj.setAngle(outsideRotation);
+                this.outsideDisc.rotation = this._outsideRotationalObj.angle;
+                if (!isNaN(innerRotation)) {
+                    this._innerRotationalObj.setAngle(innerRotation);
+                    this.innerDisc.rotation = this._innerRotationalObj.angle;
+                }
+                break;
+        }
+    }
+
+    /**
+     * 设置旋转对象角度到指定的索引，并同步内外转盘或指针的角度
+     * @param outsideIndex 外转盘索引(正整数)，值区间: [ 0, {@link outsideSplitAngles}.length )
+     * @param innerIndex 内转盘索引(正整数)，值区间: [ 0, {@link innerSplitAngles}.length )
+     */
+    public setRotationalObjectAngleToIndex(outsideIndex: number, innerIndex: number = NaN): void {
+        let outsideRotation: number = NaN;
+        let innerRotation: number = NaN;
+
+        outsideRotation = this.getRewardAngleByIndex(outsideIndex, this.currentOutsideSplitData);
+        // 加上偏移量
+        outsideRotation += this.currentOutsideSplitData.angleOffset + this.currentOutsideSplitData.splitAngles[0];
+        // 转为 [0, 360]
+        outsideRotation = Laya.MathUtil.repeat(outsideRotation, 360);
+
+        if (!isNaN(innerIndex)) {
+            innerRotation = this.getRewardAngleByIndex(innerIndex, this.currentInnerSplitData);
+            // 加上偏移量
+            innerRotation += this.currentInnerSplitData.angleOffset + this.currentInnerSplitData.splitAngles[0];
+            // 转为 [0, 360]
+            innerRotation = Laya.MathUtil.repeat(innerRotation, 360);
+        }
+
+        // 固定指针时，计算指针角度偏移
+        if ((this.mode & LuckWheelMode.SingleFixedPointer) || (this.mode & LuckWheelMode.DoubleFixedPointer)) {
+            outsideRotation = 360 - outsideRotation; // 与 splitAngles[0] 角度分割线对齐
+            outsideRotation = Laya.MathUtil.repeat(outsideRotation + this._pointerAngle, 360); // 加上指针角度偏移
+            if (!isNaN(innerRotation)) {
+                // 固定指针时，计算指针角度偏移
+                innerRotation = 360 - innerRotation; // 与 splitAngles[0] 角度分割线对齐
+                innerRotation = Laya.MathUtil.repeat(innerRotation + this._pointerAngle, 360); // 加上指针角度偏移
+            }
+        }
+
+        this.setRotationalObjectAngle(outsideRotation, innerRotation);
+    }
+
     /** 舞台可见性发生变化时调度（比如浏览器或者当前标签被切换到后台后调度） */
     private onStageVisibilityChange(): void {
         if (!Laya.stage.isVisibility) {
@@ -795,7 +860,7 @@ export class RotationalObject extends Laya.EventDispatcher {
     }
 
     /** 设置角度值 */
-    private setAngle(value: number): void {
+    public setAngle(value: number): void {
         this._angle = Laya.MathUtil.repeat(value, 360);
     }
 

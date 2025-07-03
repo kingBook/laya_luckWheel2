@@ -6,13 +6,13 @@
   "right": 0,
   "top": 0,
   "bottom": 0,
-  "name": "TestSetRotationalAngle",
+  "name": "TestLuckWheel",
   "width": 750,
   "height": 1600,
   "_$comp": [
     {
-      "_$type": "385326ad-2a39-4242-8eab-aa2e69da0a9c",
-      "scriptPath": "luckWheelDemo/TestSetRotationalAngle.ts"
+      "_$type": "1d9d725b-3556-4384-812f-a0ce3adb2a0b",
+      "scriptPath": "luckWheelDemo/TestLuckWheel.ts"
     }
   ],
   "_$child": [
@@ -20,13 +20,13 @@
       "_$id": "skyyo6hb",
       "_$type": "Label",
       "name": "tips",
-      "x": 10,
-      "width": 730,
+      "x": 38,
+      "width": 675,
       "height": 373,
       "top": 0,
       "centerX": 0,
-      "text": "按 H，开始旋转\n按 J，用索引设置奖励结果\n按 U，用角度设置奖励结果\n按 K，设置暂停\n按 L，选择分割数据\n按 I，未旋转时设置旋转对象角度到指定索引",
-      "fontSize": 35,
+      "text": "按 H，开始旋转\n按 J，用索引设置奖励结果\n按 U，用角度设置奖励结果\n按 K，设置暂停\n按 L，选择分割数据",
+      "fontSize": 50,
       "color": "#ffffff",
       "valign": "middle",
       "alignItems": "top"
