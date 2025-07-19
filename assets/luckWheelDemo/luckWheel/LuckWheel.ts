@@ -465,6 +465,8 @@ export class LuckWheel extends Laya.Script {
      * 注意：如果参数使用的是指针角度 {@link pointerAngle} 需要加上对应盘面的角度偏移量，例：
      * ```
      * const fanIndex = this.luckWheel.getOutsideIndexByAngle(this.luckWheel.pointerAngle - this.luckWheel.currentOutsideSplitData.angleOffset);
+     * // 如果是固定指针模式，则需要减去盘面自身的旋转角度，如：
+     * const fanIndex2 = this.luckWheel.getOutsideIndexByAngle(this.luckWheel.pointerAngle - this.luckWheel.currentOutsideSplitData.angleOffset - this.luckWheel.outsideDisc.rotation);
      * ```
      * @param outsideAngle 外转盘中的角度 [0, 360]
      */
@@ -495,6 +497,12 @@ export class LuckWheel extends Laya.Script {
         // 取 [0, 360]
         angle = Laya.MathUtil.repeat(angle, 360);
 
+        // 由于判断的是包含下限角，小于下限角，当前角和上限角都为360时就会出错，所以转为0度
+        // 例 ：如果当前角度为 360, 下限角为350, 上限角为360，则当前角不在上下限范围内，便出错了
+        if (angle === 360) {
+            angle = 0;
+        }
+
         let result = -1;
 
         for (let i = 0, len = splitAngles.length; i < len; i++) {
@@ -516,7 +524,7 @@ export class LuckWheel extends Laya.Script {
         }
 
         if (result === -1) {
-            throw new Error(`根据奖励角未能找到奖励索引, 奖励角为：${angle}`);
+            throw new Error(`根据角度未能找到索引, 角度为：${angle}`);
         }
         return result;
     }
@@ -724,9 +732,11 @@ export class RotationalObject extends Laya.EventDispatcher {
     private _easeThreshold: number;
 
     /** 缓动的角长（当降速到达缓动阈值时，需大于此值才开始缓动，此值还用于计算缓动的进度插值） */
-    public easeAngleLen = 260;
+    public easeAngleLen: number = 260;
     /** 开始缓动角速度的阈值 t <正数>，区间为：[0, 1]（阈值 = {@link _rpmTarget} 的绝对值 * t） */
-    public easeThresholdT = 0.5;
+    public easeThresholdT: number = 0.5;
+    /** 旋转启动时的加速插值 */
+    public startupAccelerationT: number = 0.025;
     /** 最小转速<正数> */
     public minRpm: number = 0.1;
     /** 得到奖励角时降速旋转摩擦系数 */
@@ -775,7 +785,7 @@ export class RotationalObject extends Laya.EventDispatcher {
 
         // 未得到奖励角，慢慢加速至目标速度后，以目标速度匀速旋转
         if (isNaN(this._rewardAngle)) {
-            this._rpmT = Math.min(this._rpmT + 0.025, 1);
+            this._rpmT = Math.min(this._rpmT + this.startupAccelerationT, 1);
             this._rpm = Laya.MathUtil.lerp(0, this._rpmTarget, this._rpmT);
             if (Math.abs(this._rpm) < this.minRpm) {
                 // 最慢也不能小于最小转速
