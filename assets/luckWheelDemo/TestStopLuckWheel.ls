@@ -6,13 +6,13 @@
   "right": 0,
   "top": 0,
   "bottom": 0,
-  "name": "TestLuckWheel",
+  "name": "TestStopLuckWheel",
   "width": 750,
   "height": 1600,
   "_$comp": [
     {
-      "_$type": "1d9d725b-3556-4384-812f-a0ce3adb2a0b",
-      "scriptPath": "luckWheelDemo/TestLuckWheel.ts"
+      "_$type": "d0bae288-e308-4946-acad-f6fdf453fcd9",
+      "scriptPath": "luckWheelDemo/TestStopLuckWheel.ts"
     }
   ],
   "_$child": [
@@ -25,7 +25,7 @@
       "height": 373,
       "top": 0,
       "centerX": 0,
-      "text": "按 H，开始旋转\n按 J，用索引设置奖励结果\n按 U，用角度设置奖励结果\n按 K，设置暂停\n按 L，选择分割数据",
+      "text": "按 H，开始旋转\n按 J，用索引设置奖励结果\n按 U，用角度设置奖励结果\n按 K，设置暂停\n按 L，选择分割数据\n按 I，停止旋转\n",
       "fontSize": 50,
       "color": "#ffffff",
       "valign": "middle",

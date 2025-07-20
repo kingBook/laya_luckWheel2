@@ -18,7 +18,7 @@ export class TestDoubleRotatePointer extends Laya.Script {
 
     public onKeyDown(evt: Laya.Event): void {
         if (evt.keyCode === Laya.Keyboard.H) {
-            this._luckWheelInner.startRotating();
+            this._luckWheelInner.startRotation();
             console.log("内幸运轮，开始旋转");
         } else if (evt.keyCode === Laya.Keyboard.J) {
             if (this._luckWheelInner.isRotating) {
@@ -72,7 +72,7 @@ export class TestDoubleRotatePointer extends Laya.Script {
     private onInnerWheelRotateEnd(): void {
         console.log(`内幸运轮，旋转结束, 奖励索引为：${this._luckWheelInner.outsideRewardIndex}`);
         console.log("外幸运轮，开始旋转");
-        this._luckWheelOutside.startRotating();
+        this._luckWheelOutside.startRotation();
     }
 
     private onOutsideWheelRotateEnd(): void {

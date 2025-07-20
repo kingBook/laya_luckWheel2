@@ -4,7 +4,7 @@ import { LuckWheel, LuckWheelMode } from "./luckWheel/LuckWheel";
 const { regClass, property } = Laya;
 
 @regClass()
-export class TestSetRotationalAngle extends Laya.Script {
+export class TestStopLuckWheel extends Laya.Script {
 
     private _luckWheel: LuckWheel;
 
@@ -72,12 +72,8 @@ export class TestSetRotationalAngle extends Laya.Script {
             console.log("选择分割数据：", "外转盘：" + this._luckWheel.outsideSelectIndex, "内转盘：" + this._luckWheel.innerSelectIndex);
 
         } else if (evt.keyCode === Laya.Keyboard.I) {
-            // 随机取一个外转盘的索引
-            const outsideIndex: number = Math.trunc(Math.random() * this._luckWheel.currentOutsideSplitData.splitAngles.length);
-            // 随机取一个内转盘的索引
-            const innerIndex: number = Math.trunc(Math.random() * this._luckWheel.currentInnerSplitData.splitAngles.length);
-            this._luckWheel.setRotationalObjectAngleToIndex(outsideIndex, innerIndex);
-            console.log(`设置旋转对象角度到：外索引:${outsideIndex}, 内索引:${innerIndex}`);
+            this._luckWheel.stopRotation();
+            console.log("停止旋转");
         }
     }
 

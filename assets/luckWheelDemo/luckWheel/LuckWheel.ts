@@ -53,11 +53,13 @@ enum Flag {
  * 
  * // ================ 其他接口 ======================================
  * // 开始旋转
- * luckWheel.startRotating();
+ * luckWheel.startRotation();
  * // 设置奖励的索引（需开始旋转一会，再调用）
  * luckWheel.setRewardIndex(outsideRewardIndex, innerRewardIndex);
  * // 暂停旋转
  * luckWheel.setPause(true);
+ * // 停止旋转
+ * luckWheel.stopRotation();
  * // 侦听旋转结束
  * luckWheel.owner.on(LuckWheel.ROTATE_END, this, ()=>{
  *     // 旋转结束
@@ -306,8 +308,8 @@ export class LuckWheel extends Laya.Script {
         }
     }
 
-    /** 开始旋转抽奖 */
-    public startRotating(): void {
+    /** 开始旋转 */
+    public startRotation(): void {
         if (this._flags & Flag.Rotating) return;
         this._flags |= Flag.Rotating;
 
@@ -333,6 +335,11 @@ export class LuckWheel extends Laya.Script {
                 this._innerRotationalObj.init(this.innerDisc.rotation, this.initInnerDiscRpm);
                 break;
         }
+    }
+
+    /** 停止旋转 */
+    public stopRotation(): void {
+        this._flags &= ~Flag.Rotating;
     }
 
     /**

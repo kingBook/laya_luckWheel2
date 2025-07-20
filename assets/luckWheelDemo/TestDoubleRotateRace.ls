@@ -25,7 +25,7 @@
       "left": 0,
       "right": 0,
       "top": 0,
-      "text": "按 H，开始旋转\n按 J，用索引设置奖励结果(两次)\n按 U，用角度获取索引设置奖励结果(两次)\n按 M, 直接用角度设置奖励结果(两次)",
+      "text": "按 H，开始旋转\n按 J，用索引设置奖励结果(两次)\n按 U，用角度获取索引设置奖励结果(两次)\n按 M, 直接用角度设置奖励结果(两次)\n\n注意：需要连按两次对应设置两个奖励结果",
       "fontSize": 35,
       "color": "#ffffff",
       "valign": "middle",
@@ -92,8 +92,8 @@
                   ]
                 }
               ],
-              "initInnerDiscRpm": 18.6,
               "innerDisc": null,
+              "initInnerDiscRpm": 18.6,
               "_innerSelectIndex": 0,
               "innerSplitDatas": [
                 {
@@ -1090,8 +1090,8 @@
                   ]
                 }
               ],
-              "initInnerDiscRpm": 18.6,
               "innerDisc": null,
+              "initInnerDiscRpm": 18.6,
               "_innerSelectIndex": 0,
               "innerSplitDatas": [
                 {
@@ -2014,7 +2014,7 @@
               "_$type": "Sprite",
               "name": "pointerInner",
               "x": 370,
-              "y": 349,
+              "y": 229,
               "width": 70,
               "height": 80,
               "anchorX": 0.5,

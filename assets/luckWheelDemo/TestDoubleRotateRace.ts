@@ -18,8 +18,8 @@ export class TestDoubleRotateRace extends Laya.Script {
 
     public onKeyDown(evt: Laya.Event): void {
         if (evt.keyCode === Laya.Keyboard.H) {
-            this._luckWheelInner.startRotating();
-            this._luckWheelOutside.startRotating();
+            this._luckWheelInner.startRotation();
+            this._luckWheelOutside.startRotation();
             console.log("双幸运轮，开始旋转");
         } else if (evt.keyCode === Laya.Keyboard.J) {
             if (this._luckWheelInner.isRotating) {
