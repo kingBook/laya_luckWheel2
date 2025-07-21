@@ -22,7 +22,7 @@ enum Flag {
 /**
  * 幸运转盘
  * 
- * 旋转结束时，{@link owner} 将派发 {@link ROTATE_END} 事件
+ * 旋转完成时，{@link owner} 将派发 {@link EVENT_ROTATION_COMPLETE} 事件
  * 
  * 接口说明：
  * ```
@@ -60,9 +60,9 @@ enum Flag {
  * luckWheel.setPause(true);
  * // 停止旋转
  * luckWheel.stopRotation();
- * // 侦听旋转结束
- * luckWheel.owner.on(LuckWheel.ROTATE_END, this, ()=>{
- *     // 旋转结束
+ * // 侦听旋转完成
+ * luckWheel.owner.on(LuckWheel.EVENT_ROTATION_COMPLETE, this, ()=>{
+ *     // 旋转完成
  * });
  * 
  * // 获取外转盘各个分割的区块对称轴线上的位置（多用于动态摆放奖品图标时的位置）
@@ -78,8 +78,8 @@ enum Flag {
 @regClass()
 export class LuckWheel extends Laya.Script {
 
-    /** 旋转结束事件 */
-    public static readonly ROTATE_END: string = "rotateEnd";
+    /** 旋转完成事件 */
+    public static readonly EVENT_ROTATION_COMPLETE: string = "eventRotationComplete";
 
     declare owner: Laya.Sprite;
 
@@ -271,9 +271,9 @@ export class LuckWheel extends Laya.Script {
         this._pointerRotationalObj = new RotationalObject();
         this._outsideRotationalObj = new RotationalObject();
         this._innerRotationalObj = new RotationalObject();
-        this._pointerRotationalObj.on(RotationalObject.ROTATE_END, this, this.onRotateEnd);
-        this._outsideRotationalObj.on(RotationalObject.ROTATE_END, this, this.onRotateEnd);
-        this._innerRotationalObj.on(RotationalObject.ROTATE_END, this, this.onRotateEnd);
+        this._pointerRotationalObj.on(RotationalObject.EVENT_ROTATION_COMPLETE, this, this.onRotateComplete);
+        this._outsideRotationalObj.on(RotationalObject.EVENT_ROTATION_COMPLETE, this, this.onRotateComplete);
+        this._innerRotationalObj.on(RotationalObject.EVENT_ROTATION_COMPLETE, this, this.onRotateComplete);
 
         // 调用 setter 方法, 初始显示或隐藏转盘
         this.mode = this._mode;
@@ -536,18 +536,18 @@ export class LuckWheel extends Laya.Script {
         return result;
     }
 
-    /** 旋转结束时 */
-    private onRotateEnd(rotationalObj: RotationalObject): void {
+    /** 旋转完成时 */
+    private onRotateComplete(rotationalObj: RotationalObject): void {
         switch (this.mode) {
             case LuckWheelMode.SingleRotatePointer:
             case LuckWheelMode.SingleFixedPointer:
                 this._flags &= ~Flag.Rotating;
-                this.owner.event(LuckWheel.ROTATE_END);
+                this.owner.event(LuckWheel.EVENT_ROTATION_COMPLETE);
                 break;
             case LuckWheelMode.DoubleFixedPointer:
                 if (this._outsideRotationalObj.isRotateEnd && this._innerRotationalObj.isRotateEnd) {
                     this._flags &= ~Flag.Rotating;
-                    this.owner.event(LuckWheel.ROTATE_END);
+                    this.owner.event(LuckWheel.EVENT_ROTATION_COMPLETE);
                 }
                 break;
         }
@@ -697,9 +697,9 @@ export class LuckWheel extends Laya.Script {
     }
 
     public onDestroy(): void {
-        this._pointerRotationalObj.off(RotationalObject.ROTATE_END, this, this.onRotateEnd);
-        this._outsideRotationalObj.off(RotationalObject.ROTATE_END, this, this.onRotateEnd);
-        this._innerRotationalObj.off(RotationalObject.ROTATE_END, this, this.onRotateEnd);
+        this._pointerRotationalObj.off(RotationalObject.EVENT_ROTATION_COMPLETE, this, this.onRotateComplete);
+        this._outsideRotationalObj.off(RotationalObject.EVENT_ROTATION_COMPLETE, this, this.onRotateComplete);
+        this._innerRotationalObj.off(RotationalObject.EVENT_ROTATION_COMPLETE, this, this.onRotateComplete);
         Laya.stage.off(Laya.Event.VISIBILITY_CHANGE, this, this.onStageVisibilityChange);
         this._pointerRotationalObj = null;
         this._outsideRotationalObj = null;
@@ -714,12 +714,12 @@ export class LuckWheel extends Laya.Script {
 /**
  * 旋转的对象
  * 
- * 旋转结束时，this 派发 {@link ROTATE_END} 事件
+ * 旋转完成时，this 派发 {@link EVENT_ROTATION_COMPLETE} 事件
  */
 export class RotationalObject extends Laya.EventDispatcher {
 
-    /** 旋转结束事件 */
-    public static readonly ROTATE_END: string = "rotateEnd";
+    /** 旋转完成事件 */
+    public static readonly EVENT_ROTATION_COMPLETE: string = "eventRotationComplete";
 
     /** 当前所在的角 [0,360] */
     private _angle: number;
@@ -849,8 +849,8 @@ export class RotationalObject extends Laya.EventDispatcher {
                 this._rpm = 0;
                 this.setAngle(this._rewardAngle); // 设置角度值等于奖励角避免误差
                 this._isRotateEnd = true;
-                // 结束旋转
-                this.event(RotationalObject.ROTATE_END, this);
+                // 旋转完成
+                this.event(RotationalObject.EVENT_ROTATION_COMPLETE, this);
             }
         } else if (Math.abs(this._rpm) <= this._easeThreshold) { // 降速旋转，当速度小于缓动的阈值时，开始缓动
             this._rpm = Math.sign(this._rpm) * this._easeThreshold; // 限制旋转速度在缓动角度的阈值

@@ -12,8 +12,8 @@ export class TestDoubleRotatePointer extends Laya.Script {
     public onAwake(): void {
         this._luckWheelOutside = this.owner.getChildByPath("WheelGroup.LuckWheelOutside").getComponent(LuckWheel);
         this._luckWheelInner = this.owner.getChildByPath("WheelGroup.LuckWheelInner").getComponent(LuckWheel);
-        this._luckWheelInner.owner.on(LuckWheel.ROTATE_END, this, this.onInnerWheelRotateEnd);
-        this._luckWheelOutside.owner.on(LuckWheel.ROTATE_END, this, this.onOutsideWheelRotateEnd);
+        this._luckWheelInner.owner.on(LuckWheel.EVENT_ROTATION_COMPLETE, this, this.onInnerWheelRotationComplete);
+        this._luckWheelOutside.owner.on(LuckWheel.EVENT_ROTATION_COMPLETE, this, this.onOutsideWheelRotationComplete);
     }
 
     public onKeyDown(evt: Laya.Event): void {
@@ -69,18 +69,18 @@ export class TestDoubleRotatePointer extends Laya.Script {
         }
     }
 
-    private onInnerWheelRotateEnd(): void {
+    private onInnerWheelRotationComplete(): void {
         console.log(`内幸运轮，旋转结束, 奖励索引为：${this._luckWheelInner.outsideRewardIndex}`);
         console.log("外幸运轮，开始旋转");
         this._luckWheelOutside.startRotation();
     }
 
-    private onOutsideWheelRotateEnd(): void {
+    private onOutsideWheelRotationComplete(): void {
         console.log(`外幸运轮，旋转结束, 奖励索引为：${this._luckWheelOutside.outsideRewardIndex}`);
     }
 
     public onDestroy(): void {
-        this._luckWheelInner.owner.off(LuckWheel.ROTATE_END, this, this.onInnerWheelRotateEnd);
-        this._luckWheelOutside.owner.off(LuckWheel.ROTATE_END, this, this.onInnerWheelRotateEnd);
+        this._luckWheelInner.owner.off(LuckWheel.EVENT_ROTATION_COMPLETE, this, this.onInnerWheelRotationComplete);
+        this._luckWheelOutside.owner.off(LuckWheel.EVENT_ROTATION_COMPLETE, this, this.onInnerWheelRotationComplete);
     }
 }

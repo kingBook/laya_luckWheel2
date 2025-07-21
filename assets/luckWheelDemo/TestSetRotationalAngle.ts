@@ -10,7 +10,7 @@ export class TestSetRotationalAngle extends Laya.Script {
 
     public onAwake(): void {
         this._luckWheel = this.owner.getChild("LuckWheel").getComponent(LuckWheel);
-        this._luckWheel.owner.on(LuckWheel.ROTATE_END, this, this.onRotateEnd);
+        this._luckWheel.owner.on(LuckWheel.EVENT_ROTATION_COMPLETE, this, this.onRotationComplete);
 
 
     }
@@ -81,11 +81,11 @@ export class TestSetRotationalAngle extends Laya.Script {
         }
     }
 
-    private onRotateEnd(): void {
+    private onRotationComplete(): void {
         console.log("旋转结束");
     }
 
     public onDestroy(): void {
-        this._luckWheel.owner.off(LuckWheel.ROTATE_END, this, this.onRotateEnd);
+        this._luckWheel.owner.off(LuckWheel.EVENT_ROTATION_COMPLETE, this, this.onRotationComplete);
     }
 }
