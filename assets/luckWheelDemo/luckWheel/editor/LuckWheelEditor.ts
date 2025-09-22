@@ -49,13 +49,17 @@ export class LuckWheelEditor extends IEditorEnv.CustomEditor {
         // _gizmoVisible 为 true 时才在场景视图中显示绘图
         if ((this._luckWheel as any)._gizmoVisible) {
             // 外转盘
-            this.drawOutsideSplitPolygon(); // 绘制多边形
-            this.drawOutsideNumberTexts(); // 绘制索引编号
+            if (this._luckWheel.currentOutsideSplitData && this._luckWheel.currentOutsideSplitData.splitAngles) {
+                this.drawOutsideSplitPolygon(); // 绘制多边形
+                this.drawOutsideNumberTexts(); // 绘制索引编号
+            }
 
             if (this._luckWheel.mode & LuckWheelMode.DoubleFixedPointer) {
                 // 内转盘
-                this.drawInnerSplitPolygon(); // 绘制多边形
-                this.drawInnerNumberTexts(); // 绘制索引编号
+                if (this._luckWheel.currentInnerSplitData && this._luckWheel.currentInnerSplitData.splitAngles) {
+                    this.drawInnerSplitPolygon(); // 绘制多边形
+                    this.drawInnerNumberTexts(); // 绘制索引编号
+                }
             }
         }
     }
@@ -142,7 +146,7 @@ export class LuckWheelEditor extends IEditorEnv.CustomEditor {
             if (!text) {
                 text = this._manager.createText(i2.toString());
                 text.fill(textColor);
-                text.setFontProp("size", 15 * radius * this.owner.globalScaleX * 0.015); // 字体大小与圆大小成正比
+                text.setFontProp("size", LuckWheelGizmoConfig.indexNumberFontSize * radius * this.owner.globalScaleX * 0.015); // 字体大小与圆大小成正比
                 text.touchable = false;
                 outTexts[i2] = text;
             }

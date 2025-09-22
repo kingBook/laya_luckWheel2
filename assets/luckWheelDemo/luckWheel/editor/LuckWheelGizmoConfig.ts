@@ -15,4 +15,7 @@ export class LuckWheelGizmoConfig {
 
     /** 线条宽度 */
     public static readonly lineWidth: number = 2;
+
+    /** 索引号数字的字体大小 */
+    public static readonly indexNumberFontSize:number = 15;
 }

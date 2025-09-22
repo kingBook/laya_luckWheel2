@@ -1,3 +1,4 @@
+import LuckWheelUtil from "../LuckWheelUtil";
 import { LuckWheelGizmoConfig } from "./LuckWheelGizmoConfig";
 
 /**
@@ -18,52 +19,81 @@ export class SplitAnglesPropertyField extends IEditor.ArrayField {
         buttons.addChild(btnCreateChild);
         btnCreateChild.on("click", this.onClickBtnCreateChild, this);
 
-        // 创建 'Copy Values' 按钮
+        // 创建 'Copy' 按钮
         const btnCopyValues = IEditor.GUIUtils.createButton();
         btnCopyValues.x = btnCreateChild.x + btnCreateChild.width;
-        btnCopyValues.getChild("title").text = "Copy Values";
+        btnCopyValues.getChild("title").text = "Copy";
+        btnCopyValues.width = 40;
         buttons.addChild(btnCopyValues);
         btnCopyValues.on("click", this.onClickBtnCopyValues, this);
 
+        // 创建 'Paste' 按钮
+        const btnPasteValues = IEditor.GUIUtils.createButton();
+        btnPasteValues.x = btnCopyValues.x + btnCopyValues.width;
+        btnPasteValues.getChild("title").text = "Paste";
+        btnPasteValues.width = 40;
+        buttons.addChild(btnPasteValues);
+        btnPasteValues.on("click", this.onClickBtnPasteValues, this);
+        
         return superResult;
     }
 
-    public refresh(): void {
-
-    }
-
-    /** 点击 'Create Child' 按钮时调度 */
+    /** 点击 'Create' 按钮时调度 */
     private onClickBtnCreateChild(evt: gui.Event): void {
         const selection: IEditor.IMyNode = Editor.scene.getSelection()[0];
         const luckWheel = this.getComponent(selection, "LuckWheel");
 
-        if (luckWheel) {
-            const watchProp = this.target.owner.parent.parent.watchProps[0];
+        if (!luckWheel) return;
+        const watchProp = this.target.owner.parent.parent.watchProps[0];
 
-            // 创建转盘分割区域的 child
-            if (watchProp === "outsideSplitDatas") {
-                this.createOutsideChild(selection, luckWheel);
-            } else if (watchProp === "innerSplitDatas") {
-                this.createInnerChild(selection, luckWheel);
-            }
-        } else {
-            console.error("找不到 LuckWheel 组件");
+        // 创建转盘分割区域的 child
+        if (watchProp === "outsideSplitDatas") {
+            this.createOutsideChild(selection, luckWheel);
+        } else if (watchProp === "innerSplitDatas") {
+            this.createInnerChild(selection, luckWheel);
         }
     }
 
-    /** 点击 'Copy Values' 按钮时调度 */
+    /** 点击 'Copy' 按钮时调度 */
     private onClickBtnCopyValues(evt: gui.Event): void {
-        // 将数值拷贝到剪切板
-        this.writeAnglesToClipboard(this.target.datas[0]);
-    }
-
-    /** 将一个角度值列表写入到剪切板 */
-    private writeAnglesToClipboard(angles: number[]): void {
+        // 将一个角度值列表写入到剪切板
+        const angles: number[] = this.target.datas[0];
         let text: string = "";
         for (let i = 0, len = angles.length; i < len; i++) {
             text = text.concat(`${angles[i]}${i < len - 1 ? ", " : ""}`);
         }
         Editor.clipboard.writeText(text, "clipboard");
+    }
+
+    /** 点击 'Paste Values' 按钮时调度 */
+    private onClickBtnPasteValues(evt: gui.Event): void {
+        const selection: IEditor.IMyNode = Editor.scene.getSelection()[0];
+        const luckWheel = this.getComponent(selection, "LuckWheel");
+        if (!luckWheel) return;
+
+        // 从剪贴板读取文本
+        const text = Editor.clipboard.readText("clipboard");
+
+        // 解析为数字数组
+        const newAngles: number[] = text.split(",").map(item => parseFloat(item));
+        if (!newAngles || newAngles.length <= 0) return;
+        const hasNaN = newAngles.findIndex(item => isNaN(item)) > -1;
+        if (hasNaN) return;
+
+        const watchProp = this.target.owner.parent.parent.watchProps[0];
+        const splitDatasIndex = parseInt(this.target.owner.parent.watchProps[0]);
+
+        const propMap: any = {
+            outsideSplitDatas: "outsideSplitDatas",
+            innerSplitDatas: "innerSplitDatas"
+        };
+        const splitDatas = luckWheel.props[propMap[watchProp]];
+        if (splitDatas && splitDatas[splitDatasIndex]) {
+            // 赋值
+            splitDatas[splitDatasIndex].splitAngles = newAngles;
+            // 刷新界面数据
+            this.refresh();
+        }
     }
 
     /** 创建外转盘角度分割区域的 child */
@@ -75,7 +105,7 @@ export class SplitAnglesPropertyField extends IEditor.ArrayField {
 
         // 分割的区块索引数字
         const radius = luckWheel.props._gizmoOutsideRadius * 0.8; // 数字显示在圆内，半径不取全长
-        const splitPositions: number[] = this.getSplitPositions(angleOffset, splitAngles, radius);
+        const splitPositions: number[] = LuckWheelUtil.getSplitPositions(angleOffset, splitAngles, radius);
         this.createNumberTexts(outsideChild, splitPositions, radius, LuckWheelGizmoConfig.outsideLineColor);
         return outsideChild;
     }
@@ -89,7 +119,7 @@ export class SplitAnglesPropertyField extends IEditor.ArrayField {
 
         // 分割的区块索引数字
         const radius = luckWheel.props._gizmoInnerRadius * 0.8; // 数字显示在圆内，半径不取全长
-        const splitPositions: number[] = this.getSplitPositions(angleOffset, splitAngles, radius);
+        const splitPositions: number[] = LuckWheelUtil.getSplitPositions(angleOffset, splitAngles, radius);
         this.createNumberTexts(innerChild, splitPositions, radius, LuckWheelGizmoConfig.innerLineColor);
         return innerChild;
     }
@@ -143,7 +173,7 @@ export class SplitAnglesPropertyField extends IEditor.ArrayField {
 
             const textNode = await Editor.scene.createNode("Text");
             textNode.props.align = "center";
-            textNode.props.fontSize = 20 * radius * 0.015; // 字体大小与圆大小成正比
+            textNode.props.fontSize = LuckWheelGizmoConfig.indexNumberFontSize * radius * 0.015; // 字体大小与圆大小成正比
             textNode.props.height = textNode.props.fontSize;
             textNode.props.color = textColor;
             textNode.props.anchorX = 0.5;
@@ -193,23 +223,6 @@ export class SplitAnglesPropertyField extends IEditor.ArrayField {
                 out.push(x, y);
                 angleIndex++;
             }
-        }
-        return out;
-    }
-
-    /** 获取各个分割的区块对称轴线上的位置 */
-    private getSplitPositions(angleOffset: number, splitAngles: number[], radius: number, out?: number[]): number[] {
-        out ||= [];
-        if (!splitAngles || splitAngles.length === 0) return out;
-
-        for (let i = 0, len = splitAngles.length; i < len; i++) {
-            const nextI = (i + 1) % len;
-            const min = splitAngles[i];
-            const max = i >= len - 1 ? (360 + splitAngles[0]) : splitAngles[nextI];
-            const rad = ((min + (max - min) * 0.5) + angleOffset) * Math.PI / 180;
-            const x = Math.cos(rad) * radius;
-            const y = Math.sin(rad) * radius;
-            out.push(x, y);
         }
         return out;
     }

@@ -1,3 +1,4 @@
+import LuckWheelUtil from "./LuckWheelUtil";
 import { SplitData } from "./SplitData";
 
 const { regClass, property } = Laya;
@@ -138,7 +139,7 @@ export class LuckWheel extends Laya.Script {
     }
 
     /** 外转盘的分割数据数组 */
-    @property({ type: [SplitData], catalog: "Outside", minArrayLength: 1, tips: "外转盘的分割数据数组" })
+    @property({ type: [SplitData], catalog: "Outside", nullable: false, minArrayLength: 1, tips: "外转盘的分割数据数组" })
     public outsideSplitDatas: SplitData[] = [];
     // =====================  Outside end   =======================
 
@@ -167,7 +168,7 @@ export class LuckWheel extends Laya.Script {
     }
 
     /** 内转盘的分割数据数组 */
-    @property({ type: [SplitData], catalog: "Inner", readonly: "data.mode==1||data.mode==2", minArrayLength: 1, tips: "内转盘的分割数据数组" })
+    @property({ type: [SplitData], catalog: "Inner", nullable: false, readonly: "data.mode==1||data.mode==2", minArrayLength: 1, tips: "内转盘的分割数据数组" })
     public innerSplitDatas: SplitData[] = [];
     // =====================  Inner end   =========================
 
@@ -444,11 +445,10 @@ export class LuckWheel extends Laya.Script {
      * @returns 返回位置数组，结果以 [x,y,...] 格式存储，数组的长度为: {@link outsideSplitAngles}.length * 2, 当 {@link outsideSplitAngles} 未定义或长度为 0 时返回空数组
      */
     public getOutsideSplitPositions(radius: number, isAddCenter: boolean, out?: number[]): number[] {
-        out ||= [];
-        out.length = 0;
-
-        this.getSplitPositions(this.currentOutsideSplitData, radius, isAddCenter, out);
-        return out;
+        const angleOffset = this.currentOutsideSplitData.angleOffset;
+        const splitAngles = this.currentOutsideSplitData.splitAngles;
+        const centerOffsetPoint = isAddCenter ? this._center : null;
+        return LuckWheelUtil.getSplitPositions(angleOffset, splitAngles, radius, centerOffsetPoint, out);
     }
 
     /**
@@ -459,11 +459,10 @@ export class LuckWheel extends Laya.Script {
      * @returns 返回位置数组，结果以 [x,y,...] 格式存储，数组的长度为: {@link innerSplitAngles}.length * 2, 当 {@link innerSplitAngles} 未定义或长度为 0 时返回空数组
      */
     public getInnerSplitPositions(radius: number, isAddCenter: boolean, out?: number[]): number[] {
-        out ||= [];
-        out.length = 0;
-
-        this.getSplitPositions(this.currentInnerSplitData, radius, isAddCenter, out);
-        return out;
+        const angleOffset = this.currentInnerSplitData.angleOffset;
+        const splitAngles = this.currentInnerSplitData.splitAngles;
+        const centerOffsetPoint = isAddCenter ? this._center : null;
+        return LuckWheelUtil.getSplitPositions(angleOffset, splitAngles, radius, centerOffsetPoint, out);
     }
 
     /**
@@ -551,39 +550,6 @@ export class LuckWheel extends Laya.Script {
                 }
                 break;
         }
-    }
-
-    /**
-     * 获取转盘分割线切分的各个扇形对称轴线的位置（多用于动态摆放奖品图标时的位置）
-     * @param splitData 角度分割数据
-     * @param radius 半径
-     * @param isAddCenter 计算时是否添加中心坐标
-     * @param out 存储输出结果的数组，数组的长度为: {@link splitAngles}.length * 2
-     * @returns 返回位置数组，结果以 [x,y,...] 格式存储，数组的长度为: {@link splitAngles}.length * 2, 当 {@link splitAngles} 未定义或长度为 0 时返回空数组
-     */
-    private getSplitPositions(splitData: SplitData, radius: number, isAddCenter: boolean, out?: number[]): number[] {
-        out ||= [];
-        out.length = 0;
-
-        const angleOffset = splitData.angleOffset;
-        const splitAngles = splitData.splitAngles;
-
-        if (!splitAngles || splitAngles.length === 0) return out;
-
-        for (let i = 0, len = splitAngles.length; i < len; i++) {
-            const nextI = (i + 1) % len;
-            const min = splitAngles[i];
-            const max = i >= len - 1 ? (360 + splitAngles[0]) : splitAngles[nextI];
-            const rad = Laya.Utils.toRadian(Laya.MathUtil.lerp(min, max, 0.5) + angleOffset);
-            let x = Math.cos(rad) * radius;
-            let y = Math.sin(rad) * radius;
-            if (isAddCenter) {
-                x += this._center.x;
-                y += this._center.y;
-            }
-            out.push(x, y);
-        }
-        return out;
     }
 
     /**
@@ -793,11 +759,7 @@ export class RotationalObject extends Laya.EventDispatcher {
         // 未得到奖励角，慢慢加速至目标速度后，以目标速度匀速旋转
         if (isNaN(this._rewardAngle)) {
             this._rpmT = Math.min(this._rpmT + this.startupAccelerationT, 1);
-            this._rpm = Laya.MathUtil.lerp(0, this._rpmTarget, this._rpmT);
-            if (Math.abs(this._rpm) < this.minRpm) {
-                // 最慢也不能小于最小转速
-                this._rpm = Math.sign(this._rpm) * this.minRpm;
-            }
+            this._rpm = Laya.MathUtil.lerp(Math.sign(this._rpmTarget) * this.minRpm, this._rpmTarget, this._rpmT);
             this.isShowLogMsg && console.log("未得到奖励角 rpm:", this._rpm);
             this.setAngle(this._angle + this._rpm);
             return;

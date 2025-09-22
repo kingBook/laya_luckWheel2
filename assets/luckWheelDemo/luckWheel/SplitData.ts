@@ -13,7 +13,7 @@ export class SplitData {
     public angleOffset: number = 0;
 
     /** 分割线角度列表，角度区间为：[0, 359] 小 -> 大 */
-    @property({ type: [Number], inspector: "LuckWheel.SplitAnglesPropertyField", minArrayLength: 2, elementProps: { step: 0.1, fractionDigits: 1, range: [0, 359] }, onChange: "onChangeSplitAngles", tips: "转盘的分割线角度列表，角度区间为：[0, 359] 小->大" })
+    @property({ type: [Number], inspector: "LuckWheel.SplitAnglesPropertyField", nullable: false, minArrayLength: 2, elementProps: { step: 0.1, fractionDigits: 1, range: [0, 359] }, onChange: "onChangeSplitAngles", tips: "转盘的分割线角度列表，角度区间为：[0, 359] 小->大" })
     public splitAngles: number[] = [0, 180];
 
     /** 仅用于编辑器，在编辑器中改变 splitAngles 属性时的回调，用于限制角度输入 */
