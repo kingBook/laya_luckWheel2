@@ -544,7 +544,7 @@ export class LuckWheel extends Laya.Script {
                 this.owner.event(LuckWheel.EVENT_ROTATION_COMPLETE);
                 break;
             case LuckWheelMode.DoubleFixedPointer:
-                if (this._outsideRotationalObj.isRotateEnd && this._innerRotationalObj.isRotateEnd) {
+                if (this._outsideRotationalObj.isRotationComplete && this._innerRotationalObj.isRotationComplete) {
                     this._flags &= ~Flag.Rotating;
                     this.owner.event(LuckWheel.EVENT_ROTATION_COMPLETE);
                 }
@@ -699,9 +699,11 @@ export class RotationalObject extends Laya.EventDispatcher {
     private _rewardAngle: number;
     /** 是否处于缓中... */
     private _isEasing: boolean;
-    /** 是否旋转结束 */
-    private _isRotateEnd: boolean;
-    /** 开始缓动角速度的阈值<正数> */
+    /** 是否旋转完成 */
+    private _isRotationComplete: boolean;
+    /** 是否开始降速 */
+    private _isStartSlowing: boolean;
+    /** 开始缓动时的转速阈值<正数> */
     private _easeThreshold: number;
 
     /** 缓动的角长（当降速到达缓动阈值时，需大于此值才开始缓动，此值还用于计算缓动的进度插值） */
@@ -714,8 +716,6 @@ export class RotationalObject extends Laya.EventDispatcher {
     public minRpm: number = 0.1;
     /** 得到奖励角时降速旋转摩擦系数 */
     public rotateFriction: number = 0.985;
-    /** 当到达奖励角时，再多转的圈数角 */
-    public extraCircles: number = 1;
     /** 是否显示 log */
     public isShowLogMsg: boolean = false;
 
@@ -732,7 +732,7 @@ export class RotationalObject extends Laya.EventDispatcher {
     /** 是否处于缓中... */
     public get isEasing(): boolean { return this._isEasing; }
     /** 是否旋转结束 */
-    public get isRotateEnd(): boolean { return this._isRotateEnd; }
+    public get isRotationComplete(): boolean { return this._isRotationComplete; }
 
 
     /**
@@ -749,12 +749,13 @@ export class RotationalObject extends Laya.EventDispatcher {
         this._easeThreshold = Math.abs(rpmTarget) * this.easeThresholdT;
 
         this.setRewardAngle(NaN);
+        this._isStartSlowing = false;
         this._isEasing = false;
-        this._isRotateEnd = false;
+        this._isRotationComplete = false;
     }
 
     public update(): void {
-        if (this._isRotateEnd) return;
+        if (this._isRotationComplete) return;
 
         // 未得到奖励角，慢慢加速至目标速度后，以目标速度匀速旋转
         if (isNaN(this._rewardAngle)) {
@@ -767,8 +768,8 @@ export class RotationalObject extends Laya.EventDispatcher {
 
         // 计算与奖励角还有多少距离
         const targetAngle = Math.sign(this._rpm) >= 0
-            ? this._rewardAngle + (this.extraCircles * 360)
-            : (360 - this._rewardAngle) + (this.extraCircles * 360); // 根据旋转的方向，加上额外旋转的圈数角
+            ? this._rewardAngle
+            : (360 - this._rewardAngle);
         const currentAngle = Math.sign(this._rpm) >= 0
             ? this._angle
             : 360 - this._angle;
@@ -792,9 +793,7 @@ export class RotationalObject extends Laya.EventDispatcher {
                 }
             } else {
                 // 缓动旋转
-                let rotationSpeed = Math.ceil(Laya.MathUtil.lerp(this._easeThreshold, 0, t) * 10) / 10; // 速度保留一个小数
-                rotationSpeed = Math.max(rotationSpeed, this.minRpm); // 限制最小转速
-
+                const rotationSpeed = Math.ceil(Laya.MathUtil.lerp(this._easeThreshold, this.minRpm, t) * 10) / 10; // 限制最小转速，速度保留一个小数
                 this._rpm = Math.sign(this._rpm) * rotationSpeed;
 
                 if (deltaAngle > Math.abs(this._rpm)) {
@@ -807,26 +806,35 @@ export class RotationalObject extends Laya.EventDispatcher {
             }
 
             if (isEasingFinish) {
+                this._isStartSlowing = false;
                 this._isEasing = false; // 结束缓动
                 this._rpm = 0;
                 this.setAngle(this._rewardAngle); // 设置角度值等于奖励角避免误差
-                this._isRotateEnd = true;
+                this._isRotationComplete = true;
                 // 旋转完成
                 this.event(RotationalObject.EVENT_ROTATION_COMPLETE, this);
             }
-        } else if (Math.abs(this._rpm) <= this._easeThreshold) { // 降速旋转，当速度小于缓动的阈值时，开始缓动
-            this._rpm = Math.sign(this._rpm) * this._easeThreshold; // 限制旋转速度在缓动角度的阈值
-            if (Math.abs(deltaAngle) >= this.easeAngleLen) { // 距离太小，继续走，到达大角度才缓动
+        } else if (Math.abs(this._rpm) <= Math.abs(this._rpmTarget) * this.easeThresholdT) { // 降速旋转，当速度小于缓动的阈值时，开始缓动
+            this._rpm *= this.rotateFriction;
+            if (Math.abs(deltaAngle) >= this.easeAngleLen) { // 距离太小，继续旋转，到达大角度才缓动
                 // 开始缓动
                 this._isEasing = true;
+                this._easeThreshold = Math.abs(this._rpm);
                 this.isShowLogMsg && console.log("开始缓动 rpm:", this._rpm);
+            } else {
+                this.isShowLogMsg && console.log("距离太小，继续旋转 rpm:", this._rpm);
             }
             this.setAngle(this._angle + this._rpm);
-        } else {
+        } else if (this._isStartSlowing) {
             // 降速旋转
             this._rpm *= this.rotateFriction;
             this.setAngle(this._angle + this._rpm);
             this.isShowLogMsg && console.log("降速旋转 rpm:", this._rpm);
+        } else {
+            this.setAngle(this._angle + this._rpm);
+            if (Math.abs(deltaAngle) >= this.easeAngleLen) {
+                this._isStartSlowing = true;
+            }
         }
     }
 
