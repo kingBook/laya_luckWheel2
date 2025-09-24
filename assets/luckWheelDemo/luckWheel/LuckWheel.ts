@@ -775,7 +775,8 @@ export class RotationalObject extends Laya.EventDispatcher {
             : 360 - this._angle;
         const deltaAngle = Laya.MathUtil.repeat(targetAngle - currentAngle, 360); // 距离奖励角的度数，根据旋转的方向计算，此值始终为正数
 
-        if (this._isEasing) { // 缓动中...
+        // 缓动到奖励角中...
+        if (this._isEasing) {
             let t = 1 - Laya.MathUtil.clamp01(deltaAngle / this.easeAngleLen); // 缓动的进度插值
             t = t >= 0.999 ? 1 : t;
 
@@ -814,7 +815,11 @@ export class RotationalObject extends Laya.EventDispatcher {
                 // 旋转完成
                 this.event(RotationalObject.EVENT_ROTATION_COMPLETE, this);
             }
-        } else if (Math.abs(this._rpm) <= Math.abs(this._rpmTarget) * this.easeThresholdT) { // 降速旋转，当速度小于缓动的阈值时，开始缓动
+            return;
+        }
+
+        // 降速旋转，当速度小于缓动的阈值时，开始缓动到奖励角
+        if (Math.abs(this._rpm) <= Math.abs(this._rpmTarget) * this.easeThresholdT) {
             this._rpm *= this.rotateFriction;
             if (Math.abs(deltaAngle) >= this.easeAngleLen) { // 距离太小，继续旋转，到达大角度才缓动
                 // 开始缓动
@@ -825,17 +830,23 @@ export class RotationalObject extends Laya.EventDispatcher {
                 this.isShowLogMsg && console.log("距离太小，继续旋转 rpm:", this._rpm);
             }
             this.setAngle(this._angle + this._rpm);
-        } else if (this._isStartSlowing) {
-            // 降速旋转
+            return;
+        }
+
+        // 降速旋转
+        if (this._isStartSlowing) {
             this._rpm *= this.rotateFriction;
             this.setAngle(this._angle + this._rpm);
             this.isShowLogMsg && console.log("降速旋转 rpm:", this._rpm);
-        } else {
-            this.setAngle(this._angle + this._rpm);
-            if (Math.abs(deltaAngle) >= this.easeAngleLen) {
-                this._isStartSlowing = true;
-            }
+            return;
         }
+
+        // 匀速旋转，当距离奖励角够远时，开始降速
+        this.setAngle(this._angle + this._rpm);
+        if (Math.abs(deltaAngle) >= this.easeAngleLen) {
+            this._isStartSlowing = true;
+        }
+
     }
 
     /**
