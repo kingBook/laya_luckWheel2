@@ -820,8 +820,7 @@ export class RotationalObject extends Laya.EventDispatcher {
 
         // 降速旋转
         if (this._isStartSlowing) {
-            // 当速度小于缓动的阈值时，开始缓动到奖励角
-            if (Math.abs(this._rpm) <= Math.abs(this._rpmTarget) * this.easeThresholdT) {
+            if (Math.abs(this._rpm) <= Math.abs(this._rpmTarget) * this.easeThresholdT) { // 当速度小于缓动的阈值时，开始缓动到奖励角
                 this._rpm *= this.rotateFriction;
                 if (Math.abs(deltaAngle) >= this.easeAngleLen) { // 距离太小，继续旋转，到达大角度才缓动
                     // 开始缓动
@@ -842,8 +841,7 @@ export class RotationalObject extends Laya.EventDispatcher {
 
         // 匀速旋转
         this.setAngle(this._angle + this._rpm);
-        // 尽量在同一个位置开始降速，减小缓动到奖励角过程中的转速差异
-        if (Math.abs(deltaAngle) <= Math.abs(this.rmpTarget)) {
+        if (Math.abs(deltaAngle) <= Math.abs(this.rmpTarget)) { // 尽量在同一个位置开始降速，减小缓动到奖励角过程中的转速差异
             this._isStartSlowing = true;
             this.isShowLogMsg && console.log(`距离奖励角小于速度长度,开始降速`);
         }
