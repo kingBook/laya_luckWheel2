@@ -818,26 +818,25 @@ export class RotationalObject extends Laya.EventDispatcher {
             return;
         }
 
-        // 降速旋转，当速度小于缓动的阈值时，开始缓动到奖励角
-        if (Math.abs(this._rpm) <= Math.abs(this._rpmTarget) * this.easeThresholdT) {
-            this._rpm *= this.rotateFriction;
-            if (Math.abs(deltaAngle) >= this.easeAngleLen) { // 距离太小，继续旋转，到达大角度才缓动
-                // 开始缓动
-                this._isEasing = true;
-                this._easeThreshold = Math.abs(this._rpm);
-                this.isShowLogMsg && console.log("开始缓动 rpm:", this._rpm);
-            } else {
-                this.isShowLogMsg && console.log("距离太小，继续旋转 rpm:", this._rpm);
-            }
-            this.setAngle(this._angle + this._rpm);
-            return;
-        }
-
         // 降速旋转
         if (this._isStartSlowing) {
-            this._rpm *= this.rotateFriction;
-            this.setAngle(this._angle + this._rpm);
-            this.isShowLogMsg && console.log("降速旋转 rpm:", this._rpm);
+            // 当速度小于缓动的阈值时，开始缓动到奖励角
+            if (Math.abs(this._rpm) <= Math.abs(this._rpmTarget) * this.easeThresholdT) {
+                this._rpm *= this.rotateFriction;
+                if (Math.abs(deltaAngle) >= this.easeAngleLen) { // 距离太小，继续旋转，到达大角度才缓动
+                    // 开始缓动
+                    this._isEasing = true;
+                    this._easeThreshold = Math.abs(this._rpm);
+                    this.isShowLogMsg && console.log("开始缓动 rpm:", this._rpm);
+                } else {
+                    this.isShowLogMsg && console.log("距离太小，继续旋转 rpm:", this._rpm);
+                }
+                this.setAngle(this._angle + this._rpm);
+            } else {
+                this._rpm *= this.rotateFriction;
+                this.setAngle(this._angle + this._rpm);
+                this.isShowLogMsg && console.log("降速旋转 rpm:", this._rpm);
+            }
             return;
         }
 
