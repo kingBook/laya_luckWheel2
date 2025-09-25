@@ -840,12 +840,13 @@ export class RotationalObject extends Laya.EventDispatcher {
             return;
         }
 
-        // 匀速旋转，当距离奖励角够远时，开始降速
+        // 匀速旋转
         this.setAngle(this._angle + this._rpm);
-        if (Math.abs(deltaAngle) >= this.easeAngleLen) {
+        // 尽量在同一个位置开始降速，减小缓动到奖励角过程中的转速差异
+        if (Math.abs(deltaAngle) <= Math.abs(this.rmpTarget)) {
             this._isStartSlowing = true;
+            this.isShowLogMsg && console.log(`距离奖励角小于速度长度,开始降速`);
         }
-
     }
 
     /**

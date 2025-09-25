@@ -23,9 +23,16 @@ export class TestElapsedTime extends Laya.Script {
     private _time: number;
     private delaySetReward(): void {
         Laya.timer.once(Math.random()*2000+2000, this, () => {
-            const outsideRewardIndex: number = Math.trunc(Math.random() * this._luckWheel.currentOutsideSplitData.splitAngles.length);
-            this._luckWheel.setRewardIndex(outsideRewardIndex);
-            console.log("得到开奖结果", "外转盘:" + outsideRewardIndex);
+            // 用索引设置开奖结果
+            // const outsideRewardIndex: number = Math.trunc(Math.random() * this._luckWheel.currentOutsideSplitData.splitAngles.length);
+            // this._luckWheel.setRewardIndex(outsideRewardIndex);
+            // console.log("得到开奖结果", "外转盘:" + outsideRewardIndex);
+
+            // 用角度设置开奖结果
+            const outsideRewardAngle: number = Math.trunc(Math.random() * 360);
+            this._luckWheel.setRewardAngle(outsideRewardAngle);
+            console.log("得到开奖结果", "外转盘角度:" + outsideRewardAngle, "外转盘索引:" + this._luckWheel.outsideRewardIndex);
+            
 
             const curOutsideIndex = this._luckWheel.getOutsideIndexByAngle(this._luckWheel.pointerAngle - this._luckWheel.currentOutsideSplitData.angleOffset - this._luckWheel.outsideDisc.rotation);
             console.log(`得到开奖结果，当前外转盘索引为:${curOutsideIndex}, 当前指针角度：${this._luckWheel.pointerRotationalObject.angle}`);

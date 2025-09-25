@@ -55,7 +55,7 @@
             "_$ref": "jrcr0gae"
           },
           "pointerAngleOffset": 90,
-          "initPointerRpm": -9,
+          "initPointerRpm": 9,
           "outsideDisc": {
             "_$ref": "4mj7wmn8"
           },
