@@ -822,17 +822,22 @@ export class RotationalObject extends Laya.EventDispatcher {
         if (this._isStartSlowing) {
             if (Math.abs(this._rpm) <= Math.abs(this._rpmTarget) * this.easeThresholdT) { // 当速度小于缓动的阈值时，开始缓动到奖励角
                 this._rpm *= this.rotateFriction;
+                if (Math.abs(this._rpm) < this.minRpm) this._rpm = Math.sign(this._rpmTarget) * this.minRpm; // 限制最小转速
+
                 if (Math.abs(deltaAngle) >= this.easeAngleLen) { // 距离太小，继续旋转，到达大角度才缓动
                     // 开始缓动
                     this._isEasing = true;
                     this._easeThreshold = Math.abs(this._rpm);
                     this.isShowLogMsg && console.log("开始缓动 rpm:", this._rpm);
                 } else {
+                    this.detectAndPrintMinRpmWarn(); // 检测并打印最小转速警告
                     this.isShowLogMsg && console.log("距离太小，继续旋转 rpm:", this._rpm);
                 }
                 this.setAngle(this._angle + this._rpm);
             } else {
                 this._rpm *= this.rotateFriction;
+                if (Math.abs(this._rpm) < this.minRpm) this._rpm = Math.sign(this._rpmTarget) * this.minRpm; // 限制最小转速
+                this.detectAndPrintMinRpmWarn(); // 检测并打印最小转速警告
                 this.setAngle(this._angle + this._rpm);
                 this.isShowLogMsg && console.log("降速旋转 rpm:", this._rpm);
             }
@@ -858,6 +863,13 @@ export class RotationalObject extends Laya.EventDispatcher {
     /** 设置角度值 */
     public setAngle(value: number): void {
         this._angle = Laya.MathUtil.repeat(value, 360);
+    }
+
+    /** 检测并打印最小转速警告 */
+    private detectAndPrintMinRpmWarn(): void {
+        if (Math.abs(this._rpm) <= this.minRpm) {
+            console.warn(`还未进入缓动阶段，转速就降到最小值，加大以下数值 easeThresholdT、rotateFriction 或在属性设置面板加大初始转速，避免此问题`);
+        }
     }
 
 
