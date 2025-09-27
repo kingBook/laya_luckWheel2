@@ -766,14 +766,8 @@ export class RotationalObject extends Laya.EventDispatcher {
             return;
         }
 
-        // 计算与奖励角还有多少距离
-        const targetAngle = Math.sign(this._rpm) >= 0
-            ? this._rewardAngle
-            : (360 - this._rewardAngle);
-        const currentAngle = Math.sign(this._rpm) >= 0
-            ? this._angle
-            : 360 - this._angle;
-        const deltaAngle = Laya.MathUtil.repeat(targetAngle - currentAngle, 360); // 距离奖励角的度数，根据旋转的方向计算，此值始终为正数
+        // 距离奖励角的度数，根据旋转的方向计算，此值始终为正数
+        let deltaAngle = this.getDeltaAngle();
 
         // 缓动到奖励角中...
         if (this._isEasing) {
@@ -820,25 +814,23 @@ export class RotationalObject extends Laya.EventDispatcher {
 
         // 降速旋转
         if (this._isStartSlowing) {
-            if (Math.abs(this._rpm) <= Math.abs(this._rpmTarget) * this.easeThresholdT) { // 当速度小于缓动的阈值时，开始缓动到奖励角
-                this._rpm *= this.rotateFriction;
-                if (Math.abs(this._rpm) < this.minRpm) this._rpm = Math.sign(this._rpmTarget) * this.minRpm; // 限制最小转速
+            this._rpm *= this.rotateFriction;
+            if (Math.abs(this._rpm) < this.minRpm) this._rpm = Math.sign(this._rpmTarget) * this.minRpm; // 限制最小转速
+            this.setAngle(this._angle + this._rpm);
 
-                if (Math.abs(deltaAngle) >= this.easeAngleLen) { // 距离太小，继续旋转，到达大角度才缓动
+            if (Math.abs(this._rpm) <= Math.abs(this._rpmTarget) * this.easeThresholdT) { // 当速度小于缓动的阈值时，开始缓动到奖励角
+                deltaAngle = this.getDeltaAngle(); // 距离奖励角的度数，根据旋转的方向计算，此值始终为正数
+                if (Math.abs(deltaAngle) >= this.easeAngleLen) { // 距离奖励角足够远，才开始缓动
                     // 开始缓动
                     this._isEasing = true;
                     this._easeThreshold = Math.abs(this._rpm);
                     this.isShowLogMsg && console.log("开始缓动 rpm:", this._rpm);
                 } else {
                     this.detectAndPrintMinRpmWarn(); // 检测并打印最小转速警告
-                    this.isShowLogMsg && console.log("距离太小，继续旋转 rpm:", this._rpm);
+                    this.isShowLogMsg && console.log("降速旋转, 距离奖励角太近，继续旋转 rpm:", this._rpm);
                 }
-                this.setAngle(this._angle + this._rpm);
             } else {
-                this._rpm *= this.rotateFriction;
-                if (Math.abs(this._rpm) < this.minRpm) this._rpm = Math.sign(this._rpmTarget) * this.minRpm; // 限制最小转速
                 this.detectAndPrintMinRpmWarn(); // 检测并打印最小转速警告
-                this.setAngle(this._angle + this._rpm);
                 this.isShowLogMsg && console.log("降速旋转 rpm:", this._rpm);
             }
             return;
@@ -870,6 +862,18 @@ export class RotationalObject extends Laya.EventDispatcher {
         if (Math.abs(this._rpm) <= this.minRpm) {
             console.warn(`还未进入缓动阶段，转速就降到最小值，加大以下数值 easeThresholdT、rotateFriction 或在属性设置面板加大初始转速，避免此问题`);
         }
+    }
+
+    /** 获取距离奖励角的度数，根据旋转的方向计算，此值始终为正数 */
+    private getDeltaAngle(): number {
+        const sign = Math.sign(this._rpm);
+        const targetAngle = sign >= 0
+            ? this._rewardAngle
+            : (360 - this._rewardAngle);
+        const currentAngle = sign >= 0
+            ? this._angle
+            : 360 - this._angle;
+        return Laya.MathUtil.repeat(targetAngle - currentAngle, 360);
     }
 
 
