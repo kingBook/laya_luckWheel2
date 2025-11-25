@@ -16,10 +16,7 @@ export class TestSetRotationalAngle extends Laya.Script {
     }
 
     public onKeyDown(evt: Laya.Event): void {
-        if (evt.keyCode === Laya.Keyboard.H) {
-            this._luckWheel.startRotation();
-            console.log("开始旋转");
-        } else if (evt.keyCode === Laya.Keyboard.J) {
+        if (evt.keyCode === Laya.Keyboard.J) {
             // 随机取一个外转盘的开奖结果
             const outsideRewardIndex: number = Math.trunc(Math.random() * this._luckWheel.currentOutsideSplitData.splitAngles.length);
             // 随机取一个内转盘的开奖结果

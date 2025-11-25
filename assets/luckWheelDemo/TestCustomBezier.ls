@@ -6,13 +6,13 @@
   "right": 0,
   "top": 0,
   "bottom": 0,
-  "name": "TestLuckWheel",
+  "name": "TestCustomBezier",
   "width": 750,
   "height": 1600,
   "_$comp": [
     {
-      "_$type": "1d9d725b-3556-4384-812f-a0ce3adb2a0b",
-      "scriptPath": "luckWheelDemo/TestLuckWheel.ts"
+      "_$type": "95f91666-4549-45db-beb2-58bdd2e4cd1b",
+      "scriptPath": "luckWheelDemo/TestCustomBezier.ts"
     }
   ],
   "_$child": [
@@ -25,7 +25,7 @@
       "height": 373,
       "top": 0,
       "centerX": 0,
-      "text": "按 J，用索引设置奖励结果\n按 U，用角度设置奖励结果\n按 K，设置暂停\n按 L，选择分割数据",
+      "text": "",
       "fontSize": 50,
       "color": "#ffffff",
       "valign": "middle",
@@ -47,7 +47,7 @@
         {
           "_$type": "084c02c5-8249-42bc-a85c-41ba3bac30e2",
           "scriptPath": "luckWheelDemo/luckWheel/LuckWheel.ts",
-          "_mode": 4,
+          "_mode": 2,
           "_gizmoVisible": true,
           "_gizmoOutsideRadius": 350,
           "_gizmoInnerRadius": 200,
@@ -106,7 +106,7 @@
           "innerDisc": {
             "_$ref": "6a1eqsdh"
           },
-          "isInitInnerClockwise": false,
+          "isInitInnerClockwise": true,
           "_innerSelectIndex": 0,
           "innerSplitDatas": [
             {
@@ -2724,12 +2724,14 @@
           "_$id": "6a1eqsdh",
           "_$type": "Sprite",
           "name": "InnerDisc",
+          "active": false,
           "x": 375,
           "y": 375,
           "width": 750,
           "height": 750,
           "anchorX": 0.5,
           "anchorY": 0.5,
+          "visible": false,
           "_$child": [
             {
               "_$id": "acf7f4v2",

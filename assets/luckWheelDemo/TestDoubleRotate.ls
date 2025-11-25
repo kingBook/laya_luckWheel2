@@ -6,13 +6,13 @@
   "right": 0,
   "top": 0,
   "bottom": 0,
-  "name": "TestDoubleRotatePointer",
+  "name": "TestDoubleRotate",
   "width": 750,
   "height": 1600,
   "_$comp": [
     {
-      "_$type": "3a291903-715a-448a-ba39-98c7748d8c25",
-      "scriptPath": "luckWheelDemo/TestDoubleRotatePointer.ts"
+      "_$type": "d9581ecb-3900-4d72-89c7-9e5d109fcc71",
+      "scriptPath": "luckWheelDemo/TestDoubleRotate.ts"
     }
   ],
   "_$child": [
@@ -25,9 +25,10 @@
       "left": 0,
       "right": 0,
       "top": 0,
-      "text": "按 H，开始旋转\n按 J，用索引设置奖励结果(两次)\n按 U，用角度获取索引设置奖励结果(两次)\n按 M, 直接用角度设置奖励结果(两次)",
+      "text": "按 J，用索引设置奖励结果",
       "fontSize": 35,
       "color": "#ffffff",
+      "align": "center",
       "valign": "middle",
       "alignItems": "top",
       "padding": "0,0,0,25"
@@ -66,14 +67,14 @@
               "_gizmoOutsideRadius": 350,
               "_gizmoInnerRadius": 200,
               "pointer": {
-                "_$ref": "jrcr0gae"
+                "_$ref": "a54pt186"
               },
               "pointerAngleOffset": 90,
-              "initPointerRpm": 9,
+              "isInitPointerClockwise": true,
               "outsideDisc": {
                 "_$ref": "r330fktx"
               },
-              "initOutsideDiscRpm": 9,
+              "isInitOutsideClockwise": false,
               "_outsideSelectIndex": 0,
               "outsideSplitDatas": [
                 {
@@ -92,8 +93,8 @@
                   ]
                 }
               ],
-              "initInnerDiscRpm": 18.6,
               "innerDisc": null,
+              "isInitInnerClockwise": true,
               "_innerSelectIndex": 0,
               "innerSplitDatas": [
                 {
@@ -1010,6 +1011,36 @@
                   ]
                 }
               ]
+            },
+            {
+              "_$id": "a54pt186",
+              "_$type": "Sprite",
+              "name": "pointerOutside",
+              "x": 370,
+              "y": 192,
+              "width": 70,
+              "height": 80,
+              "anchorX": 0.5,
+              "anchorY": 1,
+              "alpha": 0.5,
+              "_gcmds": [
+                {
+                  "_$type": "DrawPolyCmd",
+                  "x": 0,
+                  "y": 0,
+                  "points": [
+                    0,
+                    80,
+                    70,
+                    80,
+                    35,
+                    0
+                  ],
+                  "lineWidth": 2,
+                  "lineColor": "#ff000b",
+                  "fillColor": "rgba(255,0,10,0.5019607843137255)"
+                }
+              ]
             }
           ]
         },
@@ -1029,7 +1060,7 @@
             {
               "_$type": "084c02c5-8249-42bc-a85c-41ba3bac30e2",
               "scriptPath": "luckWheelDemo/luckWheel/LuckWheel.ts",
-              "_mode": 2,
+              "_mode": 1,
               "_gizmoVisible": true,
               "_gizmoOutsideRadius": 220,
               "_gizmoInnerRadius": 200,
@@ -1037,11 +1068,11 @@
                 "_$ref": "jrcr0gae"
               },
               "pointerAngleOffset": 90,
-              "initPointerRpm": 9,
+              "isInitPointerClockwise": true,
               "outsideDisc": {
                 "_$ref": "4mj7wmn8"
               },
-              "initOutsideDiscRpm": 9,
+              "isInitOutsideClockwise": true,
               "_outsideSelectIndex": 0,
               "outsideSplitDatas": [
                 {
@@ -1060,8 +1091,8 @@
                   ]
                 }
               ],
-              "initInnerDiscRpm": 18.6,
               "innerDisc": null,
+              "isInitInnerClockwise": true,
               "_innerSelectIndex": 0,
               "innerSplitDatas": [
                 {
@@ -1978,36 +2009,36 @@
                   ]
                 }
               ]
-            }
-          ]
-        },
-        {
-          "_$id": "jrcr0gae",
-          "_$type": "Sprite",
-          "name": "pointer",
-          "x": 370,
-          "y": 208,
-          "width": 70,
-          "height": 80,
-          "anchorX": 0.5,
-          "anchorY": 1,
-          "alpha": 0.5,
-          "_gcmds": [
+            },
             {
-              "_$type": "DrawPolyCmd",
-              "x": 0,
-              "y": 0,
-              "points": [
-                0,
-                80,
-                70,
-                80,
-                35,
-                0
-              ],
-              "lineWidth": 1,
-              "lineColor": "#000000",
-              "fillColor": "#ffce06"
+              "_$id": "jrcr0gae",
+              "_$type": "Sprite",
+              "name": "pointerInner",
+              "x": 370,
+              "y": 229,
+              "width": 70,
+              "height": 80,
+              "anchorX": 0.5,
+              "anchorY": 1,
+              "alpha": 0.5,
+              "_gcmds": [
+                {
+                  "_$type": "DrawPolyCmd",
+                  "x": 0,
+                  "y": 0,
+                  "points": [
+                    0,
+                    80,
+                    70,
+                    80,
+                    35,
+                    0
+                  ],
+                  "lineWidth": 2,
+                  "lineColor": "#00fcff",
+                  "fillColor": "rgba(0,251,255,0.5019607843137255)"
+                }
+              ]
             }
           ]
         }

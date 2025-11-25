@@ -25,7 +25,7 @@
       "height": 373,
       "top": 0,
       "centerX": 0,
-      "text": "按 H，开始旋转\n按 J，用索引设置奖励结果\n按 U，用角度设置奖励结果\n按 K，设置暂停\n按 L，选择分割数据\n按 I，停止旋转\n",
+      "text": "",
       "fontSize": 50,
       "color": "#ffffff",
       "valign": "middle",
@@ -55,11 +55,11 @@
             "_$ref": "jrcr0gae"
           },
           "pointerAngleOffset": 90,
-          "initPointerRpm": 9,
+          "initPointerIsClockwise": true,
           "outsideDisc": {
             "_$ref": "4mj7wmn8"
           },
-          "initOutsideDiscRpm": -12,
+          "initOutsideIsClockwise": true,
           "_outsideSelectIndex": 0,
           "outsideSplitDatas": [
             {
@@ -106,7 +106,7 @@
           "innerDisc": {
             "_$ref": "6a1eqsdh"
           },
-          "initInnerDiscRpm": 18.6,
+          "initInnerIsClockwise": false,
           "_innerSelectIndex": 0,
           "innerSplitDatas": [
             {

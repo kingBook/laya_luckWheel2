@@ -1,4 +1,5 @@
 import { LuckWheel, LuckWheelMode } from "./luckWheel/LuckWheel";
+import { Utils } from "./Utils";
 
 
 const { regClass, property } = Laya;
@@ -11,15 +12,10 @@ export class TestLuckWheel extends Laya.Script {
     public onAwake(): void {
         this._luckWheel = this.owner.getChild("LuckWheel").getComponent(LuckWheel);
         this._luckWheel.owner.on(LuckWheel.EVENT_ROTATION_COMPLETE, this, this.onRotationComplete);
-
-
     }
 
     public onKeyDown(evt: Laya.Event): void {
-        if (evt.keyCode === Laya.Keyboard.H) {
-            this._luckWheel.startRotation();
-            console.log("开始旋转");
-        } else if (evt.keyCode === Laya.Keyboard.J) {
+        if (evt.keyCode === Laya.Keyboard.J) {
             // 随机取一个外转盘的开奖结果
             const outsideRewardIndex: number = Math.trunc(Math.random() * this._luckWheel.currentOutsideSplitData.splitAngles.length);
             // 随机取一个内转盘的开奖结果
@@ -59,8 +55,6 @@ export class TestLuckWheel extends Laya.Script {
                     console.log("得到开奖结果", "外转盘角度:" + outsideRewardAngle, "内转盘角度：" + innerRewardAngle, "外转盘索引：" + this._luckWheel.outsideRewardIndex, "内转盘索引：" + this._luckWheel.innerRewardIndex);
                     console.log("outsideAngleOffset:", outsideAngleOffset, "outsideSplitAngle[0]:", outsideSplitAngle0);
                     console.log("innerAngleOffset:", innerAngleOffset, "innerSplitAngle0:", innerSplitAngle0);
-
-
                     break;
             }
         } else if (evt.keyCode === Laya.Keyboard.K) {
