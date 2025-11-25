@@ -1,5 +1,6 @@
 {
   "compilerOptions": {
+    "baseUrl": ".",
     "module": "es6",
     "target": "es6",
     "strict": true,
@@ -7,18 +8,34 @@
     "noEmitHelpers": true,
     "sourceMap": false,
     "experimentalDecorators": true,
+    "emitDecoratorMetadata": true,
     "skipLibCheck": true,
     "moduleResolution": "node",
+    "allowUnreachableCode": false,
     "allowSyntheticDefaultImports": true,
+    "noImplicitAny": false,
+    "resolveJsonModule": true,
     "paths": {
-      "~/packages/*": [
-        "./library/packages/*"
-      ]
-    }
+      "*": ["src/*"]
+    },
+    "lib": [
+      "DOM",
+      "ES6",
+      "DOM.Iterable",
+      "ScriptHost",
+      "ES2018",
+      "ES2018.Promise",
+      "ES2019",
+      "ES2022",
+      "ES2023"
+    ]
   },
+
+ 
   "include": [
     "./assets",
     "./src",
-    "./engine"
+    "./engine",
+    "typings.d.ts",
   ]
 }

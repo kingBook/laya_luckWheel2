@@ -1,4 +1,4 @@
-import { LuckWheel, LuckWheelMode } from "./luckWheel/LuckWheel";
+import { LuckWheel } from "./luckWheel/LuckWheel";
 
 
 const { regClass, property } = Laya;

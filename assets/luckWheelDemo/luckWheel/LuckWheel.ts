@@ -1,4 +1,4 @@
-import { Utils } from "../Utils";
+import { Utils } from "utils/Utils";
 import { BezierEaseData } from "./BezierEaseData";
 import LuckWheelUtil from "./LuckWheelUtil";
 import { SplitData } from "./SplitData";
