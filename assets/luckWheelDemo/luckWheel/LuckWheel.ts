@@ -1,4 +1,4 @@
-import { Utils } from "utils/Utils";
+import Utils from "utils/Utils";
 import { BezierEaseData } from "./BezierEaseData";
 import LuckWheelUtil from "./LuckWheelUtil";
 import { SplitData } from "./SplitData";
@@ -55,9 +55,7 @@ enum Flag {
  * luckWheel.innerSplitDatas = [splitData,...]; // 切分区块的分割线角度值，[0-359] 小 -> 大
  * 
  * // ================ 其他接口 ======================================
- * // 开始旋转
- * luckWheel.startRotation();
- * // 设置奖励的索引（需开始旋转一会，再调用）
+ * // 设置奖励的索引
  * luckWheel.setRewardIndex(outsideRewardIndex, innerRewardIndex);
  * // 暂停旋转
  * luckWheel.setPause(true);
@@ -405,14 +403,15 @@ export class LuckWheel extends Laya.Script {
             }
         }
 
+        this._flags |= Flag.Rotating;
+        this.setPause(false); // 取消暂停
+
         switch (this.mode) {
             case LuckWheelMode.SingleRotatePointer:
                 this._pointerRotationalObj.setRewardAngle(outsideRewardAngle);
-                this._flags |= Flag.Rotating;
                 break;
             case LuckWheelMode.SingleFixedPointer:
                 this._outsideRotationalObj.setRewardAngle(outsideRewardAngle);
-                this._flags |= Flag.Rotating;
                 break;
             case LuckWheelMode.DoubleFixedPointer:
                 this._outsideRotationalObj.setRewardAngle(outsideRewardAngle);
@@ -421,7 +420,6 @@ export class LuckWheel extends Laya.Script {
                 } else {
                     throw new Error("innerRewardAngle 未设置, DoubleFixedPointer 模式时，必须设置内转盘的奖励角");
                 }
-                this._flags |= Flag.Rotating;
                 break;
         }
     }
@@ -679,11 +677,11 @@ export class RotationalObject extends Laya.EventDispatcher {
     public static readonly EVENT_ROTATION_COMPLETE: string = "eventRotationComplete";
 
 
-    /** 当前所在的角 [0,360] */
+    /** 当前所在的角 */
     private _angle: number;
     /** 旋转的方向，1或-1 */
     private _rotationSign: number;
-    /** 奖励角度 [0,360] */
+    /** 奖励角度 */
     private _rewardAngle: number;
     /** 是否旋转完成 */
     private _isRotationComplete: boolean;
@@ -691,10 +689,12 @@ export class RotationalObject extends Laya.EventDispatcher {
     private _angleStart: number;
     /** 动画当前时间<毫秒> */
     private _aniTime: number;
+    /** 动画的进度 [0, 1] */
+    private _normalizedT: number;
 
-    /** 动画总时长<毫秒>, 默认：7000 */
+    /** 动画总时长<毫秒，大于0的整数>，默认：7000 */
     public aniTotalTime: number = 7000;
-    /** 旋转的圈数，默认：5 */
+    /** 旋转的圈数<大于0的整数>，默认：5 */
     public circles: number = 5;
     /** 贝塞尔缓动数据，https://cubic-bezier.com/ */
     public bezierEaseData: BezierEaseData = { p1x: .42, p1y: 0, p2x: .58, p2y: 1 };
@@ -711,6 +711,9 @@ export class RotationalObject extends Laya.EventDispatcher {
     public get rewardAngle360(): number { return Laya.MathUtil.repeat(this._rewardAngle, 360); }
     /** 是否旋转结束 */
     public get isRotationComplete(): boolean { return this._isRotationComplete; }
+    /** 动画的进度 [0, 1] */
+    public get normalizedT(): number { return this._normalizedT; }
+
 
 
     /**
@@ -723,6 +726,7 @@ export class RotationalObject extends Laya.EventDispatcher {
         this.setAngle(Laya.MathUtil.repeat(angle, 360));
 
         this._rotationSign = rotationSign;
+        this._normalizedT = 0;
 
         bezierEaseData && (this.bezierEaseData = bezierEaseData);
 
@@ -736,9 +740,13 @@ export class RotationalObject extends Laya.EventDispatcher {
         this._aniTime += Laya.timer.delta;
 
         const t = Laya.MathUtil.clamp01(Math.trunc(this._aniTime / this.aniTotalTime * 1000) / 1000);
+        this._normalizedT = t;
+
         // 贝塞尔曲线运动
         const tb = Utils.createBezierEase(t, this.bezierEaseData.p1x, this.bezierEaseData.p1y, this.bezierEaseData.p2x, this.bezierEaseData.p2y);
-        this.setAngle(Laya.MathUtil.lerp(this._angleStart, this._rewardAngle, tb));
+        const newAngle = Math.trunc(Laya.MathUtil.lerp(this._angleStart, this._rewardAngle, tb) * 100) / 100;
+        this.isShowLogMsg && console.log(`动画进度：${t}, tb:${tb}, newAngle:${newAngle}`);
+        this.setAngle(newAngle);
 
         // 旋转完成
         if (t >= 1) {
@@ -756,6 +764,7 @@ export class RotationalObject extends Laya.EventDispatcher {
         const rewardAngle360 = Laya.MathUtil.repeat(value, 360); // 转为0-360
 
         this._aniTime = 0;
+        this._normalizedT = 0;
         this._isRotationComplete = false;
 
         // 旋转起始角度

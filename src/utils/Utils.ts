@@ -1,4 +1,4 @@
-export class Utils {
+export default class Utils {
     
     /**
      * 创建自定义贝塞尔缓动

@@ -18,7 +18,7 @@ export class TestCustomBezier extends Laya.Script {
     }
 
     private delaySetReward(): void {
-        Laya.timer.once(Math.random()*2000+1000, this, () => {
+        Laya.timer.once(Math.random() * 2000 + 1000, this, () => {
             // 自定义贝塞尔曲线数据, https://cubic-bezier.com/
             // 根据旋转模式，选择对应的 RotationalObject 进行设置
             this._luckWheel.outsideRotationalObject.bezierEaseData = { p1x: 0, p1y: 0, p2x: 1, p2y: 1 };
@@ -37,6 +37,7 @@ export class TestCustomBezier extends Laya.Script {
             this._luckWheel.owner.on(LuckWheel.EVENT_ROTATION_COMPLETE, () => {
                 console.log("旋转完成");
             });
+            this._luckWheel.outsideRotationalObject.isShowLogMsg = true; // 打印外转盘log
         })
     }
 
