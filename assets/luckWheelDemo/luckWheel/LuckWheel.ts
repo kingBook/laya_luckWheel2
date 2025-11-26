@@ -697,7 +697,7 @@ export class RotationalObject extends Laya.EventDispatcher {
     /** 旋转的圈数<大于0的整数>，默认：5 */
     public circles: number = 5;
     /** 贝塞尔缓动数据，https://cubic-bezier.com/ */
-    public bezierEaseData: BezierEaseData = { p1x: .42, p1y: 0, p2x: .58, p2y: 1 };
+    public bezierEaseData: BezierEaseData = { precision: 8, data: [.42, 0, .58, 1] };
     /** 是否显示 log */
     public isShowLogMsg: boolean = false;
 
@@ -743,7 +743,7 @@ export class RotationalObject extends Laya.EventDispatcher {
         this._normalizedT = t;
 
         // 贝塞尔曲线运动
-        const tb = Utils.createBezierEase(t, this.bezierEaseData.p1x, this.bezierEaseData.p1y, this.bezierEaseData.p2x, this.bezierEaseData.p2y);
+        const tb = Utils.createBezierEase(t, this.bezierEaseData.data[0], this.bezierEaseData.data[1], this.bezierEaseData.data[2], this.bezierEaseData.data[3], this.bezierEaseData.precision);
         const newAngle = Math.trunc(Laya.MathUtil.lerp(this._angleStart, this._rewardAngle, tb) * 100) / 100;
         this.isShowLogMsg && console.log(`动画进度：${t}, tb:${tb}, newAngle:${newAngle}`);
         this.setAngle(newAngle);

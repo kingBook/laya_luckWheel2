@@ -7,10 +7,11 @@ export default class Utils {
      * @param p1y 
      * @param p2x 
      * @param p2y 
+     * @param precision 精度位数<正整数>，默认：8
      * @description 工具推荐：https://cubic-bezier.com/ （拖拽生成控制点，复制数字直接用）, 如：创建自定义贝塞尔缓动（控制点：P1(0.25, 0.1), P2(0.25, 1) —— 标准 easeOut）
      * @returns 
      */
-    static createBezierEase(t: number, p1x: number, p1y: number, p2x: number, p2y: number): number {
+    static createBezierEase(t: number, p1x: number, p1y: number, p2x: number, p2y: number, precision:number = 8): number {
 
         /**
          * 三次贝塞尔曲线计算函数（核心）
@@ -35,7 +36,7 @@ export default class Utils {
 
             // 二分法求逆（找到 t' 使得 x(t') = t）
             let a = 0, b = 1;
-            for (let i = 0; i < 8; i++) {  // 迭代 8 次，精度足够
+            for (let i = 0; i < precision; i++) {  // 迭代 8 次，精度足够
                 let mid = (a + b) / 2;
                 let midX = cubicBezierX(mid, p1x, p2x);  // 只计算 X
                 if (midX < t) {
